@@ -37,4 +37,16 @@ public class StringUtils {
     public static boolean isNotBlank(String s){
         return !isBlank(s);
     }
+    
+    public static int[] strArr2intArr(String[] strArr){
+      if(strArr != null){
+        int[] intArr = new int[strArr.length];
+        for(int i=0;i<strArr.length;i++){
+          intArr[i] = Integer.parseInt(strArr[i].trim());
+        }
+        return intArr;
+      }else{
+        return null;
+      }
+    }
 }

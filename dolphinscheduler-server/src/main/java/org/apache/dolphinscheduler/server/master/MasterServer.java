@@ -30,6 +30,8 @@ import org.apache.dolphinscheduler.service.bean.SpringApplicationContext;
 import org.apache.dolphinscheduler.service.process.ProcessService;
 import org.apache.dolphinscheduler.service.quartz.ProcessScheduleJob;
 import org.apache.dolphinscheduler.service.quartz.QuartzExecutors;
+import org.apache.dolphinscheduler.service.trigger.TriggerExecutors;
+import org.apache.dolphinscheduler.service.trigger.TriggerSchedule;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
 
 import javax.annotation.PostConstruct;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -100,7 +103,6 @@ public class MasterServer implements IStoppable {
     public static void main(String[] args) {
         Thread.currentThread().setName(Constants.THREAD_NAME_MASTER_SERVER);
         new SpringApplicationBuilder(MasterServer.class).web(WebApplicationType.NONE).run(args);
-
     }
 
     /**
@@ -136,7 +138,7 @@ public class MasterServer implements IStoppable {
         // start QuartzExecutors
         // what system should do if exception
         try {
-            logger.info("start Quartz server...");
+            logger.info("start Quartz(TimeTrigger) server...");
             ProcessScheduleJob.init(processService);
             QuartzExecutors.getInstance().start();
         } catch (Exception e) {
@@ -145,9 +147,23 @@ public class MasterServer implements IStoppable {
             } catch (SchedulerException e1) {
                 logger.error("QuartzExecutors shutdown failed : " + e1.getMessage(), e1);
             }
-            logger.error("start Quartz failed", e);
+            logger.error("start Quartz(TimeTrigger) failed", e);
         }
 
+        // start TriggerExecutors
+        // what system should do if exception
+        try {
+          logger.info("start Trigger(EventTrigger) server...");
+          TriggerSchedule.init(processService);
+          TriggerExecutors.getInstance().start();
+        } catch (Exception e) {
+          try {
+            TriggerExecutors.getInstance().shutdown();
+          } catch (Exception e1) {
+            logger.error("TriggerExecutors shutdown failed : " + e1.getMessage(), e1);
+          }
+          logger.error("start Trigger(EventTrigger) failed", e);
+        }
 
         /**
          *  register hooks, which are called before the process exits
@@ -194,7 +210,6 @@ public class MasterServer implements IStoppable {
             }catch (Exception e){
                 logger.warn("heartbeat service stopped exception");
             }
-
             logger.info("heartbeat service stopped");
 
             //close quartz
@@ -203,8 +218,15 @@ public class MasterServer implements IStoppable {
             }catch (Exception e){
                 logger.warn("Quartz service stopped exception:{}",e.getMessage());
             }
-
             logger.info("Quartz service stopped");
+            
+            //close trigger
+            try{
+                TriggerExecutors.getInstance().shutdown();
+            }catch (Exception e){
+                logger.warn("Trigger service stopped exception:{}",e.getMessage());
+            }
+            logger.info("Trigger service stopped");
 
             try {
                 ThreadPoolExecutors.getInstance().shutdown();

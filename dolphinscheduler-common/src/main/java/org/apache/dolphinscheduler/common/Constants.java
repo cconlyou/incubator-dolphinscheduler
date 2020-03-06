@@ -431,7 +431,7 @@ public final class Constants {
     public static final int DEFAULT_MASTER_COMMIT_RETRY_INTERVAL = 3000;
 
     /**
-     * time unit secong to minutes
+     * time unit second to minutes
      */
     public static final int SEC_2_MINUTES_TIME_UNIT = 60;
 
@@ -989,6 +989,10 @@ public final class Constants {
     public static final String RECEIVERS = "receivers";
     public static final String RECEIVERS_CC = "receiversCc";
 
+    /**
+     * Event trigger configuration
+     */
+    public static final int EVENT_TRIGGER_SLEEP_SECONDS = 30;
 
     /**
      * dataSource sensitive param

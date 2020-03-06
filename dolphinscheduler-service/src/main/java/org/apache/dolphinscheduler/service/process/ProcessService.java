@@ -37,6 +37,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -98,6 +101,9 @@ public class ProcessService {
     @Autowired
     private  ProjectMapper projectMapper;
 
+    @Autowired
+    private  TriggerEventMapper triggerEventMapper;
+
     /**
      * task queue impl
      */
@@ -116,12 +122,12 @@ public class ProcessService {
         ProcessInstance processInstance = constructProcessInstance(command, host);
         //cannot construct process instance, return null;
         if(processInstance == null){
-            logger.error("scan command, command parameter is error: %s", command.toString());
+            logger.error("scan command, command parameter is error: {}", command);
             moveToErrorCommand(command, "process instance is null");
             return null;
         }
         if(!checkThreadNum(command, validThreadNum)){
-            logger.info("there is not enough thread for this command: {}",command.toString() );
+            logger.info("there is not enough thread for this command: {}", command);
             return setWaitingThreadProcess(command, processInstance);
         }
         processInstance.setCommandType(command.getCommandType());
@@ -477,7 +483,7 @@ public class ProcessService {
             if(cmdParam == null
                     || !cmdParam.containsKey(Constants.CMDPARAM_START_NODE_NAMES)
                     || cmdParam.get(Constants.CMDPARAM_START_NODE_NAMES).isEmpty()){
-                logger.error(String.format("command node depend type is %s, but start nodes is null ", command.getTaskDependType().toString()));
+                logger.error("command node depend type is {}, but start nodes is null ", command.getTaskDependType());
                 return false;
             }
         }
@@ -500,7 +506,7 @@ public class ProcessService {
         if(command.getProcessDefinitionId() != 0){
             processDefinition = processDefineMapper.selectById(command.getProcessDefinitionId());
             if(processDefinition == null){
-                logger.error(String.format("cannot find the work process define! define id : %d", command.getProcessDefinitionId()));
+                logger.error("cannot find the work process define! define id : {}", command.getProcessDefinitionId());
                 return null;
             }
         }
@@ -973,25 +979,25 @@ public class ProcessService {
                 return true;
             }
             if(taskInstance.getState().typeIsFinished()){
-                logger.info(String.format("submit to task queue, but task [%s] state [%s] is already  finished. ", taskInstance.getName(), taskInstance.getState().toString()));
+                logger.info("submit to task queue, but task [{}] state [{}] is already  finished. ", taskInstance.getName(), taskInstance.getState());
                 return true;
             }
             // task cannot submit when running
             if(taskInstance.getState() == ExecutionStatus.RUNNING_EXEUTION){
-                logger.info(String.format("submit to task queue, but task [%s] state already be running. ", taskInstance.getName()));
+                logger.info("submit to task queue, but task [{}] state already be running. ", taskInstance.getName());
                 return true;
             }
             if(checkTaskExistsInTaskQueue(taskInstance)){
-                logger.info(String.format("submit to task queue, but task [%s] already exists in the queue.", taskInstance.getName()));
+                logger.info("submit to task queue, but task [{}] already exists in the queue.", taskInstance.getName());
                 return true;
             }
             logger.info("task ready to queue: {}" , taskInstance);
             boolean insertQueueResult = taskQueue.add(DOLPHINSCHEDULER_TASKS_QUEUE, taskZkInfo(taskInstance));
-            logger.info(String.format("master insert into queue success, task : %s", taskInstance.getName()) );
+            logger.info("master insert into queue success, task : {}", taskInstance.getName());
             return insertQueueResult;
         }catch (Exception e){
             logger.error("submit task to queue Exception: ", e);
-            logger.error("task queue error : %s", JSONUtils.toJson(taskInstance));
+            logger.error("task queue error : {}", JSONUtils.toJson(taskInstance));
             return false;
         }
     }
@@ -1457,6 +1463,20 @@ public class ProcessService {
     public Schedule querySchedule(int id) {
         return scheduleMapper.selectById(id);
     }
+    
+    /**
+     * query schedule by id
+     * if too many records returned, select the latest order by update_time desc
+     * @param id groupId
+     * @return schedule
+     */
+    public Schedule findSchedule(int groupId) {
+      List<Schedule> schedules = scheduleMapper.queryEventTriggerSchedule(TriggerType.EVENT_TRIGGER, groupId);
+      if(schedules != null && schedules.size() > 0){
+        return schedules.get(0);
+      }
+      return null;
+    }
 
     /**
      * query Schedule by processDefinitionId
@@ -1819,5 +1839,180 @@ public class ProcessService {
         return userMapper.queryDetailsById(userId);
     }
 
+    /**
+     * get triggered processes by task
+     * @param projectInfo = projectId
+     * @param processInfo
+     * @param taskInfo
+     * @return 
+     */
+    public void submitTaskTriggerEvent(TaskInstance taskInst){
+      if(taskInst == null  //get task name
+        || taskInst.getProcessDefine() == null  //get project info
+        || taskInst.getProcessInstance() == null){  //get schedule info
+        logger.error("submit task of[{}] trigger event failed with miss key infomartion", taskInst.getName());
+        return;
+      }
+      ProcessDefinition processDefine = taskInst.getProcessDefine();
+      List<TriggerEvent> triggeredEvents = genTriggeredEvents(processDefine.getProjectName()
+                                                             ,processDefine.getName()
+                                                             ,taskInst.getName());
+      Date scheduleTime = taskInst.getProcessInstance().getScheduleTime();
+      if(triggeredEvents == null || triggeredEvents.size() == 0){
+        logger.info("No trigger events after task[{}_{}_{}_{}] done",processDefine.getProjectName()
+                   ,processDefine.getName(),taskInst.getName(),DateUtils.dateToString(scheduleTime));
+        return;
+      }
+      for(int i=0;i<triggeredEvents.size();i++){
+        TriggerEvent element = triggeredEvents.get(i);
+        element.setScheduleTime(scheduleTime);
+        element.setTriggerTime(getTriggeredTime(scheduleTime, element.getTriTimeType()));
+      }
+      saveOrUpdateTriggerEvent(triggeredEvents);
+    }
+
+    
+
+    public void submitProcessTriggerEvent(ProcessInstance procInst){
+      if(procInst == null  //get task name
+          || procInst.getProcessDefinition() == null){  //get project info
+          logger.error("submit process of[{}] trigger event failed with miss key infomartion", procInst.getName());
+          return;
+        }
+        ProcessDefinition processDefine = procInst.getProcessDefinition();
+        List<TriggerEvent> triggeredEvents = genTriggeredEvents(processDefine.getProjectName()
+                                                               ,processDefine.getName()
+                                                               ,null);
+        if(triggeredEvents == null || triggeredEvents.size() == 0){
+          logger.info("No trigger events after process[{}_{}_{}] done",processDefine.getProjectName()
+                     ,processDefine.getName(),DateUtils.dateToString(procInst.getScheduleTime()));
+          return;
+        }
+        Date scheduleTime = procInst.getScheduleTime();
+        for(int i=0;i<triggeredEvents.size();i++){
+          TriggerEvent element = triggeredEvents.get(i);
+          element.setScheduleTime(scheduleTime);
+          element.setTriggerTime(getTriggeredTime(scheduleTime, element.getTriTimeType()));
+        }
+        saveOrUpdateTriggerEvent(triggeredEvents);
+    }
+
+    private Date getTriggeredTime(Date scheduleTime,String triTimeType){
+      if(scheduleTime == null || triTimeType == null){
+        return null;
+      }
+      DateFormat dateFmt = new SimpleDateFormat("yyyyMMdd");
+      switch (triTimeType.toUpperCase().trim()) {
+      case "DD"://day
+        //use default;
+        break;
+      case "MM"://month
+        dateFmt = new SimpleDateFormat("yyyyMM");
+        break;
+      case "HH"://hour
+        dateFmt = new SimpleDateFormat("yyyyMMddHH");
+        break;
+      case "YY"://month
+        dateFmt = new SimpleDateFormat("yyyy");
+        break;
+      case "MI"://minute
+        dateFmt = new SimpleDateFormat("yyyyMMddHHmm");
+      case "SS"://second
+        return scheduleTime;
+      default:
+        logger.warn("No supported trigger time type[{}]",triTimeType);
+        return null;
+      }
+      try {
+        return dateFmt.parse(dateFmt.format(scheduleTime));
+      } catch (ParseException e) {
+        logger.error("Trans trigger time from schedule time[{}] with format[{}] failed",scheduleTime,triTimeType,e);
+        return null;
+      }
+    }
+
+    /**
+     * generate triggered processes by task
+     * @param projectInfo = projectId
+     * @param processInfo
+     * @param taskInfo
+     * @return User
+     */
+    public List<TriggerEvent> genTriggeredEvents(String projectInfo,String processInfo,String taskInfo){
+      EventTriggerType eventType = null;
+      if(StringUtils.isBlank(taskInfo)){
+        eventType = EventTriggerType.EVENT_TRIGGER_PROCESS;
+      }else{
+        eventType = EventTriggerType.EVENT_TRIGGER_TASK;
+      }
+      return triggerEventMapper.queryTriggeredGroups(projectInfo,processInfo,taskInfo,eventType.getCode());
+    }
+    
+    /**
+     * @param triggerEvents
+     * @return effect rows number
+     */
+    public int saveOrUpdateTriggerEvent(List<TriggerEvent> triggerEvents){
+      if(triggerEvents == null){
+        return 0;
+      }
+      int insertRows = 0;
+      int updateRows = 0;
+      for(int i=0;i<triggerEvents.size();i++){
+        if(triggerEventMapper.saveIfNotExist(triggerEvents.get(i)) > 0){
+          insertRows += 1;
+        }else{
+          updateRows += triggerEventMapper.updateIfExist(triggerEvents.get(i));
+        }
+        //effectRows += triggerEventMapper.saveOrUpdate(triggerEvents.get(i));
+      }
+      logger.info("Total[{}] and insert [{}] and update[{}] trigger events",triggerEvents.size(),insertRows,updateRows);
+      return insertRows + updateRows;
+    }
+
+    public List<TriggerGroup> pollTriggeredGroup(){
+      return triggerEventMapper.pollTriggeredGroup(Constants.COMMA);
+    }
+
+    /**
+     * @param eventIds
+     * @param reason
+     * @return
+     */
+    public boolean disableTriggerEvents(int[] eventIds,String reason){
+      if(eventIds == null || eventIds.length < 1){
+        return true;
+      }else{
+        return triggerEventMapper.updateTriggerEventsStatus(eventIds,0,reason) > 0;
+      }
+    }
+
+    /**
+     * move 
+     * @param eventIds
+     * @return
+     */
+    public boolean safeDeleteTriggerEvents(int[] eventIds){
+      if(eventIds == null || eventIds.length < 1){
+        return true;
+      }else{
+        int backupRows = triggerEventMapper.backupTriggerEvents(eventIds);
+        int removeRows = triggerEventMapper.deleteTriggerEvents(eventIds);
+        return backupRows > 0 && backupRows == removeRows;
+      }
+    }
+
+    /**
+     * 
+     * @param eventIds
+     * @return
+     */
+    public boolean deleteTriggerEvents(int[] eventIds){
+      if(eventIds == null || eventIds.length < 1){
+        return true;
+      }else{
+        return triggerEventMapper.deleteTriggerEvents(eventIds) > 0;
+      }
+    }
 
 }

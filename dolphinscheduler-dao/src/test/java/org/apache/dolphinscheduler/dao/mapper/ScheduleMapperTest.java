@@ -19,6 +19,7 @@ package org.apache.dolphinscheduler.dao.mapper;
 
 import org.apache.dolphinscheduler.common.enums.FailureStrategy;
 import org.apache.dolphinscheduler.common.enums.ReleaseState;
+import org.apache.dolphinscheduler.common.enums.TriggerType;
 import org.apache.dolphinscheduler.common.enums.WarningType;
 import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;
 import org.apache.dolphinscheduler.dao.entity.Project;
@@ -213,6 +214,21 @@ public class ScheduleMapperTest {
 
         List<Schedule> schedules= scheduleMapper.queryByProcessDefinitionId(schedule.getProcessDefinitionId());
         scheduleMapper.deleteById(schedule.getId());
+        Assert.assertNotEquals(schedules.size(), 0);
+    }
+    
+    /**
+     * test query by process definition id
+     */
+    @Test
+    public void TestQueryEventTriggerSchedule() {
+        Schedule schedule = insertOne();
+        schedule.setProcessDefinitionId(12345);
+        schedule.setTriggerType(TriggerType.EVENT_TRIGGER);
+        scheduleMapper.updateById(schedule);
+
+        List<Schedule> schedules= scheduleMapper.queryByProcessDefinitionId(schedule.getProcessDefinitionId());
+        scheduleMapper.queryEventTriggerSchedule(TriggerType.EVENT_TRIGGER,12345);
         Assert.assertNotEquals(schedules.size(), 0);
     }
 }

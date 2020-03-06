@@ -55,7 +55,6 @@ public class SessionService extends BaseService{
    */
   public Session getSession(HttpServletRequest request)  {
     String sessionId = request.getHeader(Constants.SESSION_ID);
-
     if(StringUtils.isBlank(sessionId)) {
       Cookie cookie = getCookie(request, Constants.SESSION_ID);
 

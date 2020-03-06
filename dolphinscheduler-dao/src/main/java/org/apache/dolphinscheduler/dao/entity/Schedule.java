@@ -23,6 +23,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import org.apache.dolphinscheduler.common.enums.FailureStrategy;
 import org.apache.dolphinscheduler.common.enums.Priority;
 import org.apache.dolphinscheduler.common.enums.ReleaseState;
+import org.apache.dolphinscheduler.common.enums.TriggerType;
 import org.apache.dolphinscheduler.common.enums.WarningType;
 
 import java.util.Date;
@@ -36,6 +37,9 @@ public class Schedule {
 
   @TableId(value="id", type=IdType.AUTO)
   private int id;
+
+  private TriggerType triggerType = TriggerType.TIME_TRRIGGER;
+
   /**
    * process definition id
    */
@@ -304,5 +308,13 @@ public class Schedule {
 
   public void setDefinitionDescription(String definitionDescription) {
     this.definitionDescription = definitionDescription;
+  }
+
+  public TriggerType getTriggerType() {
+    return triggerType;
+  }
+
+  public void setTriggerType(TriggerType triggerType) {
+    this.triggerType = triggerType;
   }
 }

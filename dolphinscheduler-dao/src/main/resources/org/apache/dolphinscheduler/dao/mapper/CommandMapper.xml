@@ -18,6 +18,21 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="org.apache.dolphinscheduler.dao.mapper.CommandMapper">
+    <!-- only one instance running at the same time -->
+    <select id="getOneToRun" resultType="org.apache.dolphinscheduler.dao.entity.Command">
+      select command.*
+        from t_ds_command            command
+  inner join t_ds_process_definition definition on command.process_definition_id = definition.id
+   left join t_ds_process_instance   instance   on command.process_definition_id = instance.process_definition_id
+                                               and instance.state = 1 -- running
+       where definition.release_state = 1
+         and definition.flag = 1
+         and (instance.process_definition_id is null   -- only one running on each process(run serially)
+          or definition.enable_parallel = 1)           -- or enable parallel
+    order by command.update_time asc,command.process_definition_id asc
+       limit 1
+    </select>
+    <!--
     <select id="getOneToRun" resultType="org.apache.dolphinscheduler.dao.entity.Command">
         select command.* from t_ds_command command
         join t_ds_process_definition definition on command.process_definition_id = definition.id
@@ -25,6 +40,7 @@
         order by command.update_time asc
         limit 1
     </select>
+     -->
     <select id="countCommandState" resultType="org.apache.dolphinscheduler.dao.entity.CommandCount">
         select cmd.command_type as command_type, count(1) as count
         from t_ds_command cmd, t_ds_process_definition process

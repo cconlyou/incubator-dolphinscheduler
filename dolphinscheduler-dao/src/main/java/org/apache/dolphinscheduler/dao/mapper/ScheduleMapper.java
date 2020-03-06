@@ -16,6 +16,7 @@
  */
 package org.apache.dolphinscheduler.dao.mapper;
 
+import org.apache.dolphinscheduler.common.enums.TriggerType;
 import org.apache.dolphinscheduler.dao.entity.Schedule;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -67,4 +68,11 @@ public interface ScheduleMapper extends BaseMapper<Schedule> {
      */
     List<Schedule> queryReleaseSchedulerListByProcessDefinitionId(@Param("processDefinitionId") int processDefinitionId);
 
+    /**
+     * query schedule list by group id
+     * @param triggerType must be TriggerType.EVENT_TRIGGER
+     * @param groupId
+     * @return
+     */
+    List<Schedule> queryEventTriggerSchedule(@Param("triggerType") TriggerType triggerType,@Param("groupId") int groupId);
 }

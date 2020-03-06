@@ -29,7 +29,6 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -164,7 +163,11 @@ public class ProcessDefinition {
      */
     private String modifyBy;
 
-
+    /**
+     * whether can run parallel
+     */
+    private int enableParallel = 0;
+    
     public String getName() {
         return name;
     }
@@ -367,6 +370,14 @@ public class ProcessDefinition {
         this.modifyBy = modifyBy;
     }
 
+    public int getEnableParallel() {
+      return enableParallel;
+    }
+
+    public void setEnableParallel(int enableParallel) {
+      this.enableParallel = enableParallel;
+    }
+
     @Override
     public String toString() {
         return "ProcessDefinition{" +
@@ -396,4 +407,5 @@ public class ProcessDefinition {
                 ", modifyBy='" + modifyBy + '\'' +
                 '}';
     }
+
 }

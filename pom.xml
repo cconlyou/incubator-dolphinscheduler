@@ -72,7 +72,7 @@
         <cron.utils.version>5.0.5</cron.utils.version>
         <fastjson.version>1.2.61</fastjson.version>
         <druid.version>1.1.14</druid.version>
-        <h2.version>1.3.163</h2.version>
+        <h2.version>1.4.200</h2.version>
         <commons.codec.version>1.6</commons.codec.version>
         <commons.logging.version>1.1.1</commons.logging.version>
         <httpclient.version>4.4.1</httpclient.version>
@@ -201,13 +201,6 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>${h2.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.dolphinscheduler</groupId>
                 <artifactId>dolphinscheduler-server</artifactId>
                 <version>${project.version}</version>
@@ -242,7 +235,6 @@
                 <artifactId>dolphinscheduler-alert</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-framework</artifactId>
@@ -348,7 +340,17 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.connector.version}</version>
-                <scope>test</scope>
+              <!-- <scope>test</scope> -->
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -685,6 +687,7 @@
                         <include>**/common/threadutils/*.java</include>
                         <include>**/common/graph/*.java</include>
                         <include>**/common/queue/*.java</include>
+                        <include>**/common/task/SqoopParameterEntityTest.java</include>
                         <include>**/api/utils/CheckUtilsTest.java</include>
                         <include>**/api/utils/FileUtilsTest.java</include>
                         <include>**/api/utils/FourLetterWordTest.java</include>
@@ -722,11 +725,13 @@
                         <include>**/dao/mapper/AlertGroupMapperTest.java</include>
                         <include>**/dao/mapper/AlertMapperTest.java</include>
                         <include>**/dao/mapper/CommandMapperTest.java</include>
+                        <include>**/dao/entity/TaskInstanceTest.java</include>
                         <include>**/dao/cron/CronUtilsTest.java</include>
                         <include>**/dao/utils/DagHelperTest.java</include>
                         <include>**/alert/template/AlertTemplateFactoryTest.java</include>
                         <include>**/alert/template/impl/DefaultHTMLTemplateTest.java</include>
                         <include>**/server/worker/task/datax/DataxTaskTest.java</include>
+                        <include>**/server/worker/task/sqoop/SqoopTaskTest.java</include>
                         <include>**/server/utils/DataxUtilsTest.java</include>
                     </includes>
                     <!-- <skip>true</skip> -->

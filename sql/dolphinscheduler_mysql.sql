@@ -367,6 +367,7 @@ CREATE TABLE `t_ds_process_definition` (
   `tenant_id` int(11) NOT NULL DEFAULT '-1' COMMENT 'tenant id',
   `update_time` datetime DEFAULT NULL COMMENT 'update time',
   `modify_by` varchar(36) DEFAULT '' COMMENT 'modify user',
+  `enable_parallel` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0 disable, 1 enable',
   PRIMARY KEY (`id`),
   KEY `process_definition_index` (`project_id`,`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -561,6 +562,7 @@ CREATE TABLE `t_ds_resources` (
 DROP TABLE IF EXISTS `t_ds_schedules`;
 CREATE TABLE `t_ds_schedules` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'key',
+  `trigger_type` tinyint(4) NOT NULL DEFAULT 11 COMMENT '11:timetrigger;21:eventtrigger-process;22:eventtrigger-task'
   `process_definition_id` int(11) NOT NULL COMMENT 'process definition id',
   `start_time` datetime NOT NULL COMMENT 'start time',
   `end_time` datetime NOT NULL COMMENT 'end time',
@@ -729,5 +731,108 @@ CREATE TABLE `t_ds_worker_server` (
   `last_heartbeat_time` datetime DEFAULT NULL COMMENT 'update time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for td_etl_trigger_group
+-- ----------------------------
+DROP TABLE IF EXISTS `td_etl_trigger_group`;
+CREATE TABLE `td_etl_trigger_group` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'key',
+  `group_name` varchar(100) NOT NULL,
+  `group_desc` varchar(300) DEFAULT NULL,
+  `tri_project_id` int(11) NOT NULL,
+  `tri_project_name` varchar(20) NOT NULL,
+  `tri_process_def_id` int(11) NOT NULL,
+  `tri_process_def_name` varchar(80) NOT NULL,
+  `tri_time_type` varchar(10) DEFAULT 'DD',
+  `remark` varchar(100) DEFAULT NULL,
+  `enable_flag` int(11) DEFAULT '1',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_user` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for td_etl_trigger_group_member
+-- ----------------------------
+DROP TABLE IF EXISTS `td_etl_trigger_group_member`;
+CREATE TABLE `td_etl_trigger_group_member` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'key',
+  `group_id` int(11) NOT NULL,
+  `group_name` varchar(100) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(20) NOT NULL,
+  `process_def_id` int(11) NOT NULL,
+  `process_def_name` varchar(80) NOT NULL,
+  `task_id` int(11) DEFAULT NULL,
+  `task_name` varchar(80) DEFAULT NULL,
+  `member_type` int(11) DEFAULT NULL,
+  `remark` varchar(100) DEFAULT NULL,
+  `enable_flag` int(11) DEFAULT '1',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_user` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for tr_etl_trigger_event
+-- ----------------------------
+DROP TABLE IF EXISTS `tr_etl_trigger_event`;
+CREATE TABLE `tr_etl_trigger_event` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'key',
+  `group_id` int(11) NOT NULL,
+  `group_name` varchar(100) NOT NULL,
+  `tri_project_id` int(11) NOT NULL,
+  `tri_project_name` varchar(20) NOT NULL,
+  `tri_process_def_id` int(11) NOT NULL,
+  `tri_process_def_name` varchar(80) NOT NULL,
+  `tri_time_type` varchar(10) DEFAULT NULL,
+  `trigger_time` datetime NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(20) NOT NULL,
+  `process_def_id` int(11) NOT NULL,
+  `process_def_name` varchar(80) NOT NULL,
+  `task_id` int(11) DEFAULT NULL,
+  `task_name` varchar(80) DEFAULT NULL,
+  `member_type` int(11) DEFAULT NULL,
+  `schedule_time` datetime DEFAULT NULL,
+  `submit_count` int(11) DEFAULT NULL,
+  `remark` varchar(200) DEFAULT NULL,
+  `enable_flag` int(11) DEFAULT '1',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for tl_etl_trigger_event_log
+-- ----------------------------
+DROP TABLE IF EXISTS `tl_etl_trigger_event_log`;
+CREATE TABLE `tl_etl_trigger_event_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'key',
+  `event_id` int(11) DEFAULT NULL,
+  `group_id` int(11) DEFAULT NULL,
+  `group_name` varchar(100) DEFAULT NULL,
+  `tri_project_id` int(11) DEFAULT NULL,
+  `tri_project_name` varchar(20) DEFAULT NULL,
+  `tri_process_def_id` int(11) DEFAULT NULL,
+  `tri_process_def_name` varchar(80) DEFAULT NULL,
+  `tri_time_type` varchar(10) DEFAULT NULL,
+  `trigger_time` datetime DEFAULT NULL,
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(20) NOT NULL,
+  `process_def_id` int(11) NOT NULL,
+  `process_def_name` varchar(80) NOT NULL,
+  `task_id` int(11) DEFAULT NULL,
+  `task_name` varchar(80) DEFAULT NULL,
+  `member_type` int(11) DEFAULT NULL,
+  `schedule_time` datetime DEFAULT NULL,
+  `submit_count` int(11) DEFAULT NULL,
+  `remark` varchar(200) DEFAULT NULL,
+  `enable_flag` int(11) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `log_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`log_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 SET FOREIGN_KEY_CHECKS = 1;

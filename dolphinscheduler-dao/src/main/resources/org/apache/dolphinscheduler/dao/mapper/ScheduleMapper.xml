@@ -60,4 +60,12 @@
         from t_ds_schedules
         where process_definition_id =#{processDefinitionId} and release_state = 1
     </select>
+    <select id="queryEventTriggerSchedule" resultType="org.apache.dolphinscheduler.dao.entity.Schedule">
+      select *
+        from t_ds_schedules
+       where process_definition_id = #{groupId}
+         and release_state = 1
+         and trigger_type = #{triggerType}
+    order by update_time desc
+    </select>
 </mapper>

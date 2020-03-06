@@ -21,7 +21,6 @@ import org.apache.dolphinscheduler.dao.entity.Command;
 import org.apache.dolphinscheduler.dao.entity.CommandCount;
 import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;
 import org.apache.dolphinscheduler.common.enums.*;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,11 +142,23 @@ public class CommandMapperTest {
 
         ProcessDefinition processDefinition = createProcessDefinition();
 
+        System.out.println("--processId:"+processDefinition.getId());
         Command expectedCommand = createCommand(CommandType.START_PROCESS,processDefinition.getId());
+        System.out.println("--commandId:"+expectedCommand.getId());
 
         Command actualCommand = commandMapper.getOneToRun();
 
         assertEquals(expectedCommand, actualCommand);
+    }
+    
+    /**
+     * modify process instance status
+     * test only one process instance running at the same time on each process
+     */
+    @Test
+    public void testGetOneToRun2() {
+      Command actualCommand = commandMapper.getOneToRun();
+      assertNull(actualCommand);
     }
 
     /**
