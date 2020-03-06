@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one or more
+  ~ contributor license agreements.  See the NOTICE file distributed with
+  ~ this work for additional information regarding copyright ownership.
+  ~ The ASF licenses this file to You under the Apache License, Version 2.0
+  ~ (the "License"); you may not use this file except in compliance with
+  ~ the License.  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.apache.dolphinscheduler.dao.mapper.TriggerEventMapper">
+
+    <select id="countTriggeredGroups" resultType="java.lang.Integer">
+       select sum(1)
+         from td_etl_trigger_group        a
+   inner join td_etl_trigger_group_member b on a.group_id = b.group_id and b.enable_flag = 1
+        where a.enable_flag = 1
+        <if test="projectInfo != null and projectInfo != ''">
+            and b.project_name = #{projectInfo}
+        </if>
+        <if test="processDefInfo != null and processDefInfo != ''">
+            and b.process_def_name = #{processDefInfo}
+        </if>
+        <if test="taskInfo != null and taskInfo != ''">
+            and b.task_name = #{taskInfo}
+        </if >
+        <if test="memberType != null and memberType != ''">
+            and b.member_type = #{memberType}
+        </if >
+    </select>
+
+    <select id="queryTriggeredGroups" resultType="org.apache.dolphinscheduler.dao.entity.TriggerEvent">
+       select a.group_id
+              ,a.group_name
+              ,a.group_desc
+              ,a.tri_project_id
+              ,a.tri_project_name
+              ,a.tri_process_def_id
+              ,a.tri_process_def_name
+              ,a.tri_time_type
+              ,b.member_id
+              ,b.project_id
+              ,b.project_name
+              ,b.process_def_id
+              ,b.process_def_name
+              ,b.task_id
+              ,b.task_name
+              ,b.member_type
+         from td_etl_trigger_group        a
+   inner join td_etl_trigger_group_member b on a.group_id = b.group_id and b.enable_flag = 1
+        where a.enable_flag = 1
+        <if test="projectInfo != null and projectInfo != ''">
+            and b.project_name = #{projectInfo}
+        </if>
+        <if test="processDefInfo != null and processDefInfo != ''">
+            and b.process_def_name = #{processDefInfo}
+        </if>
+        <if test="taskInfo != null and taskInfo != ''">
+            and b.task_name = #{taskInfo}
+        </if >
+        <if test="memberType != null and memberType != ''">
+            and b.member_type = #{memberType}
+        </if >
+    </select>
+
+    <insert id="saveBatchIfNotExist">
+insert into tr_etl_trigger_event(
+         --  event_id  -- auto generate when defining table
+             group_id
+            ,group_name
+            ,tri_project_id
+            ,tri_project_name
+            ,tri_process_def_id
+            ,tri_process_def_name
+            ,tri_time_type
+            ,trigger_time
+            ,project_id
+            ,project_name
+            ,process_def_id
+            ,process_def_name
+            ,task_id
+            ,task_name
+            ,schedule_time
+            ,member_type
+            ,submit_count
+         -- ,update_time -- auto generate when defining table
+            ) values
+      <foreach collection="items" item="obj" index="index" separator=" union all ">
+     select  #{obj.groupId}
+            ,#{obj.groupName}
+            ,#{obj.triProjectId}
+            ,#{obj.triProjectName}
+            ,#{obj.triProcessDefId}
+            ,#{obj.triProcessDefName}
+            ,#{obj.triTimeType}
+            ,#{obj.triggerTime}
+            ,#{obj.projectId}
+            ,#{obj.projectName}
+            ,#{obj.processDefId}
+            ,#{obj.processDefName}
+            ,#{obj.taskId}
+            ,#{obj.taskName}
+            ,#{obj.scheduleTime}
+            ,#{obj.memberType}
+            ,#{obj.submitCount}
+       from td_etl_trigger_group a
+  left join tr_etl_trigger_event b  on a.group_id = b.group_id
+                                   and b.project_name = #{obj.projectName}
+                                   and b.process_def_name = #{obj.processDefName}
+                                   and b.task_name = #{obj.taskName}
+                                   and b.trigger_time = #{obj.triggerTime}
+      where a.group_name = #{obj.groupName}
+        and b.group_id is null
+      </foreach>
+    </insert>
+
+    <insert id="saveIfNotExist">
+insert into tr_etl_trigger_event(
+         --  event_id  -- auto generate when defining table
+             group_id
+            ,group_name
+            ,tri_project_id
+            ,tri_project_name
+            ,tri_process_def_id
+            ,tri_process_def_name
+            ,tri_time_type
+            ,trigger_time
+            ,project_id
+            ,project_name
+            ,process_def_id
+            ,process_def_name
+            ,task_id
+            ,task_name
+            ,schedule_time
+            ,member_type
+            ,submit_count
+         -- ,update_time -- auto generate when defining table
+            )
+     select  #{item.groupId}
+            ,#{item.groupName}
+            ,#{item.triProjectId}
+            ,#{item.triProjectName}
+            ,#{item.triProcessDefId}
+            ,#{item.triProcessDefName}
+            ,#{item.triTimeType}
+            ,#{item.triggerTime}
+            ,#{item.projectId}
+            ,#{item.projectName}
+            ,#{item.processDefId}
+            ,#{item.processDefName}
+            ,#{item.taskId}
+            ,#{item.taskName}
+            ,#{item.scheduleTime}
+            ,#{item.memberType}
+            ,#{item.submitCount}
+       from td_etl_trigger_group a
+  left join tr_etl_trigger_event b  on a.group_id = b.group_id
+                                   and b.project_name = #{item.projectName}
+                                   and b.process_def_name = #{item.processDefName}
+                                   and b.task_name = #{item.taskName}
+                                   and b.trigger_time = #{item.triggerTime}
+      where a.group_name = #{item.groupName}
+        and b.group_id is null
+    </insert>
+
+    <update id="updateIfExist">
+    update tr_etl_trigger_event
+       set submit_count = submit_count + 1
+     where group_name = #{item.groupName}
+       and project_name = #{item.projectName}
+       and process_def_name = #{item.processDefName}
+       and task_name = #{item.taskName}
+       and trigger_time = #{item.triggerTime}
+    </update>
+
+    <update id="saveOrUpdate">
+  merge into tr_etl_trigger_event a
+       using (select  #{item.groupId}           as group_id
+                     ,#{item.groupName}         as group_name
+                     ,#{item.triProjectId}      as tri_project_id
+                     ,#{item.triProjectName}    as tri_project_name
+                     ,#{item.triProcessDefId}   as tri_process_def_id
+                     ,#{item.triProcessDefName} as tri_process_def_name
+                     ,#{item.triTimeType}       as tri_time_type
+                     ,#{item.triggerTime}       as trigger_time
+                     ,#{item.projectId}         as project_id
+                     ,#{item.projectName}       as project_name
+                     ,#{item.processDefId}      as process_def_id
+                     ,#{item.processDefName}    as process_def_name
+                     ,#{item.taskId}            as task_id
+                     ,#{item.taskName}          as task_name
+                     ,#{item.scheduleTime}      as schedule_time
+                     ,#{item.memberType}        as member_type
+                     ,#{item.submitCount}       as submit_count
+             ) b
+          on (a.group_id         = b.group_id
+         and  a.project_name     = b.project_name
+         and  a.process_def_name = b.process_def_name
+         and  a.task_name        = b.task_name
+         and  a.trigger_time     = b.trigger_time)
+        when not matched then
+      insert (group_id
+             ,group_name
+             ,tri_project_id
+             ,tri_project_name
+             ,tri_process_def_id
+             ,tri_process_def_name
+             ,tri_time_type
+             ,trigger_time
+             ,project_id
+             ,project_name
+             ,process_def_id
+             ,process_def_name
+             ,task_id
+             ,task_name
+             ,schedule_time
+             ,member_type
+             ,submit_count)
+      values (b.group_id
+             ,b.group_name
+             ,b.tri_project_id
+             ,b.tri_project_name
+             ,b.tri_process_def_id
+             ,b.tri_process_def_name
+             ,b.tri_time_type
+             ,b.trigger_time
+             ,b.project_id
+             ,b.project_name
+             ,b.process_def_id
+             ,b.process_def_name
+             ,b.task_id
+             ,b.task_name
+             ,b.schedule_time
+             ,b.member_type
+             ,b.submit_count
+             )
+        when matched then
+      update set a.submit_count = a.submit_count + 1
+    </update>
+
+    <select id="pollTriggeredGroup" resultType="org.apache.dolphinscheduler.dao.entity.TriggerGroup">
+       select a.group_id
+              ,a.group_name
+              ,a.tri_project_id
+              ,a.tri_project_name
+              ,a.tri_process_def_id
+              ,a.tri_process_def_name
+              ,a.tri_time_type
+              ,c.trigger_time
+              ,group_concat(c.event_id separator #{separator}) as event_ids
+         from td_etl_trigger_group        a
+   inner join td_etl_trigger_group_member b  on a.group_id    = b.group_id
+                                           and b.enable_flag = 1
+    left join tr_etl_trigger_event       c  on a.group_id       = c.group_id
+                                           and b.project_id     = c.project_id
+                                           and b.process_def_id = c.process_def_id
+                                           and b.task_id        = c.task_id
+                                           and c.trigger_time is not null
+                                           and c.enable_flag = 1
+        where a.enable_flag = 1
+     group by a.group_id
+              ,a.group_name
+              ,a.tri_project_id
+              ,a.tri_project_name
+              ,a.tri_process_def_id
+              ,a.tri_process_def_name
+              ,c.trigger_time
+       having sum(1) = sum(case when c.trigger_time is not null then 1 else 0 end)
+    </select>
+    
+    <update id="updateTriggerEventsStatus">
+    update tr_etl_trigger_event t
+       set  t.enable_flag = #{enableFlag}
+           ,t.remark = #{remark}
+     where event_id in
+      <foreach collection="ids" item="item" index="index" open="("  separator="," close=")">
+      #{item}
+      </foreach>
+    </update>
+
+    <insert id="backupTriggerEvents">
+    insert into tl_etl_trigger_event_log(
+                 event_id
+                ,group_id
+                ,group_name
+                ,tri_project_id
+                ,tri_project_name
+                ,tri_process_def_id
+                ,tri_process_def_name
+                ,tri_time_type
+                ,trigger_time
+                ,project_id
+                ,project_name
+                ,process_def_id
+                ,process_def_name
+                ,task_id
+                ,task_name
+                ,member_type
+                ,schedule_time
+                ,submit_count
+                ,enable_flag
+                ,update_time
+                )
+         select  event_id
+                ,group_id
+                ,group_name
+                ,tri_project_id
+                ,tri_project_name
+                ,tri_process_def_id
+                ,tri_process_def_name
+                ,tri_time_type
+                ,trigger_time
+                ,project_id
+                ,project_name
+                ,process_def_id
+                ,process_def_name
+                ,task_id
+                ,task_name
+                ,member_type
+                ,schedule_time
+                ,submit_count
+                ,enable_flag
+                ,update_time
+           from tr_etl_trigger_event
+          where event_id in
+      <foreach collection="ids" item="item" index="index" open="("  separator="," close=")">
+      #{item}
+      </foreach>
+    </insert>
+    
+    <delete id="deleteTriggerEvents">
+    delete from tr_etl_trigger_event
+          where event_id in
+      <foreach collection="ids" item="item" index="index" open="("  separator="," close=")">
+      #{item}
+      </foreach>
+    </delete>
+
+</mapper>
