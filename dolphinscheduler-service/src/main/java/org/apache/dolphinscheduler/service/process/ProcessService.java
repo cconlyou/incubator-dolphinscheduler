@@ -1467,8 +1467,8 @@ public class ProcessService {
     /**
      * query schedule by id
      * if too many records returned, select the latest order by update_time desc
-     * @param id groupId
-     * @return schedule
+     * @param groupId trigger group id
+     * @return schedule 
      */
     public Schedule findSchedule(int groupId) {
       List<Schedule> schedules = scheduleMapper.queryEventTriggerSchedule(TriggerType.EVENT_TRIGGER, groupId);
@@ -1481,6 +1481,7 @@ public class ProcessService {
     /**
      * query Schedule by processDefinitionId
      * @param processDefinitionId processDefinitionId
+     * @return List of schedule
      * @see Schedule
      */
     public List<Schedule> queryReleaseSchedulerListByProcessDefinitionId(int processDefinitionId) {
@@ -1841,10 +1842,10 @@ public class ProcessService {
 
     /**
      * get triggered processes by task
-     * @param projectInfo = projectId
-     * @param processInfo
-     * @param taskInfo
-     * @return 
+     * @param taskInst with following args
+     * [1] projectInfo = projectId
+     * [2] processInfo
+     * [3] taskInfo
      */
     public void submitTaskTriggerEvent(TaskInstance taskInst){
       if(taskInst == null  //get task name
@@ -1872,7 +1873,11 @@ public class ProcessService {
     }
 
     
-
+    /**
+     * @param procInst with following args
+     * [1] projectInfo = projectId
+     * [2] processInfo
+     */
     public void submitProcessTriggerEvent(ProcessInstance procInst){
       if(procInst == null  //get task name
           || procInst.getProcessDefinition() == null){  //get project info
@@ -1933,10 +1938,11 @@ public class ProcessService {
 
     /**
      * generate triggered processes by task
-     * @param projectInfo = projectId
-     * @param processInfo
-     * @param taskInfo
-     * @return User
+     * @param projectInfo get project name
+     * @param processInfo get process name
+     * @param taskInfo get task name
+     * @see TriggerEvent
+     * @return List of TriggerEvent
      */
     public List<TriggerEvent> genTriggeredEvents(String projectInfo,String processInfo,String taskInfo){
       EventTriggerType eventType = null;
@@ -1975,9 +1981,9 @@ public class ProcessService {
     }
 
     /**
-     * @param eventIds
-     * @param reason
-     * @return
+     * @param eventIds id of trigger events
+     * @param reason the reason of disable
+     * @return true : success;false : failed
      */
     public boolean disableTriggerEvents(int[] eventIds,String reason){
       if(eventIds == null || eventIds.length < 1){
@@ -1988,9 +1994,9 @@ public class ProcessService {
     }
 
     /**
-     * move 
-     * @param eventIds
-     * @return
+     * safely delete : delete after successfully backup
+     * @param eventIds id of trigger events
+     * @return true : success;false : failed
      */
     public boolean safeDeleteTriggerEvents(int[] eventIds){
       if(eventIds == null || eventIds.length < 1){
@@ -2003,9 +2009,9 @@ public class ProcessService {
     }
 
     /**
-     * 
-     * @param eventIds
-     * @return
+     * delete from database table
+     * @param eventIds id of trigger events
+     * @return true : success;false : failed
      */
     public boolean deleteTriggerEvents(int[] eventIds){
       if(eventIds == null || eventIds.length < 1){

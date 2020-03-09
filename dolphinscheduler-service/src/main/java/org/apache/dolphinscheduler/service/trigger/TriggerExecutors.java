@@ -72,7 +72,6 @@ public class TriggerExecutors {
   /**
    * Whether the scheduler has been started.
    *
-   * @throws SchedulerException scheduler exception
    */
   public void start() {
     if (!scheduler.isAlive()){
@@ -88,7 +87,7 @@ public class TriggerExecutors {
    * and cleans up all resources associated with the Scheduler.
    *
    * The scheduler cannot be re-started.
-   * @throws SchedulerException scheduler exception
+   * @throws Exception every exception
    */
   public void shutdown() throws Exception {
     if (scheduler.isAlive()) {
