@@ -568,5 +568,6 @@ export default {
   'Some Columns': '选择列',
   'Modify User': '修改用户',
   'Branch flow': '分支流转',
-  'Cannot select the same node for successful branch flow and failed branch flow': '成功分支流转和失败分支流转不能选择同一个节点'
+  'Cannot select the same node for successful branch flow and failed branch flow': '成功分支流转和失败分支流转不能选择同一个节点',
+  'enable parallel': '能否并行'
 }

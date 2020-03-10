@@ -119,7 +119,9 @@ export default {
         state.globalParams = processDefinitionJson.globalParams
         // timeout
         state.timeout = processDefinitionJson.timeout
-
+        // enableParallel
+        state.enableParallel = processDefinitionJson.enableParallel
+        // tenantId
         state.tenantId = processDefinitionJson.tenantId
         resolve(res.data)
       }).catch(res => {
@@ -156,7 +158,9 @@ export default {
         state.globalParams = processInstanceJson.globalParams
         // timeout
         state.timeout = processInstanceJson.timeout
-
+        // enableParallel
+        state.enableParallel = processInstanceJson.enableParallel
+        // tenantId
         state.tenantId = processInstanceJson.tenantId
 
         //startup parameters
@@ -178,7 +182,8 @@ export default {
         globalParams: state.globalParams,
         tasks: state.tasks,
         tenantId: state.tenantId,
-        timeout: state.timeout
+        timeout: state.timeout,
+        enableParallel: state.enableParallel
       }
       io.post(`projects/${state.projectName}/process/save`, {
         processDefinitionJson: JSON.stringify(data),
@@ -202,7 +207,8 @@ export default {
         globalParams: state.globalParams,
         tasks: state.tasks,
         tenantId: state.tenantId,
-        timeout: state.timeout
+        timeout: state.timeout,
+        enableParallel: state.enableParallel
       }
       io.post(`projects/${state.projectName}/process/update`, {
         processDefinitionJson: JSON.stringify(data),
@@ -227,7 +233,8 @@ export default {
         globalParams: state.globalParams,
         tasks: state.tasks,
         tenantId: state.tenantId,
-        timeout: state.timeout
+        timeout: state.timeout,
+        enableParallel: state.enableParallel
       }
       io.post(`projects/${state.projectName}/instance/update`, {
         processInstanceJson: JSON.stringify(data),

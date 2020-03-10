@@ -59,7 +59,12 @@
           </x-input>
         </span>
       </div>
-
+      <div class="title" style="padding-top: 6px;">
+        <span class="text-b">{{$t('enable parallel')}}</span>
+        <span style="padding-left: 6px;">
+          <x-switch v-model="enableParallel"></x-switch>
+        </span>
+      </div>
       <div class="title" style="padding-top: 6px;">
         <span>{{$t('Set global')}}</span>
       </div>
@@ -114,7 +119,8 @@
 
         tenantId: -1,
         // checked Timeout alarm
-        checkedTimeout: true
+        checkedTimeout: true,
+        enableParallel: false
       }
     },
     mixins: [disabledState],
@@ -142,6 +148,11 @@
         this.store.commit('dag/setTenantId', _.cloneDeep(this.tenantId))
         this.store.commit('dag/setDesc', _.cloneDeep(this.description))
         this.store.commit('dag/setSyncDefine', this.syncDefine)
+        if (this.enableParallel) {
+          this.store.commit('dag/setEnableParallel', 1)
+        } else {
+          this.store.commit('dag/setEnableParallel', 0)
+        }
       },
       /**
        * submit
@@ -206,6 +217,7 @@
       this.timeout = dag.timeout || 0
       this.checkedTimeout = this.timeout !== 0
       this.tenantId = dag.tenantId || -1
+      this.enableParallel = dag.enableParallel == 1
     },
     mounted () {},
     components: {FormTenant, mLocalParams }

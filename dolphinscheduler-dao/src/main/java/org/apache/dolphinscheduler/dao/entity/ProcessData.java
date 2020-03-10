@@ -41,6 +41,10 @@ public class ProcessData {
 
   private int tenantId;
 
+  /**
+   * whether can run parallel
+   */
+  private int enableParallel = 0;
 
   public ProcessData() {
   }
@@ -101,5 +105,13 @@ public class ProcessData {
 
   public void setTenantId(int tenantId) {
     this.tenantId = tenantId;
+  }
+
+  public int getEnableParallel() {
+    return enableParallel;
+  }
+
+  public void setEnableParallel(int enableParallel) {
+    this.enableParallel = enableParallel;
   }
 }

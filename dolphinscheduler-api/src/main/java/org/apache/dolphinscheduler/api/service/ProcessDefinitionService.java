@@ -143,6 +143,7 @@ public class ProcessDefinitionService extends BaseDAGService {
         processDefine.setLocations(locations);
         processDefine.setConnects(connects);
         processDefine.setTimeout(processData.getTimeout());
+        processDefine.setEnableParallel(processData.getEnableParallel());
         processDefine.setTenantId(processData.getTenantId());
         processDefine.setModifyBy(loginUser.getUserName());
 
@@ -309,6 +310,7 @@ public class ProcessDefinitionService extends BaseDAGService {
         processDefine.setLocations(locations);
         processDefine.setConnects(connects);
         processDefine.setTimeout(processData.getTimeout());
+        processDefine.setEnableParallel(processData.getEnableParallel());
         processDefine.setTenantId(processData.getTenantId());
         processDefine.setModifyBy(loginUser.getUserName());
 
@@ -854,6 +856,7 @@ public class ProcessDefinitionService extends BaseDAGService {
                         processDefine.setLocations(subProcess.getLocations());
                         processDefine.setConnects(subProcess.getConnects());
                         processDefine.setTimeout(subProcess.getTimeout());
+                        processDefine.setEnableParallel(subProcess.getEnableParallel());
                         processDefine.setTenantId(subProcess.getTenantId());
                         processDefine.setGlobalParams(subProcess.getGlobalParams());
                         processDefine.setCreateTime(now);

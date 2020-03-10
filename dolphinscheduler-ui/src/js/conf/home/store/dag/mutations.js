@@ -58,6 +58,12 @@ export default {
     state.timeout = payload
   },
   /**
+   * set enableParallel
+   */
+  setEnableParallel (state, payload) {
+    state.enableParallel = payload
+  },
+  /**
    * set tenantId
    */
   setTenantId (state, payload) {
@@ -105,6 +111,7 @@ export default {
     state.name = payload && payload.name || ''
     state.description = payload && payload.description || ''
     state.timeout = payload && payload.timeout || 0
+    state.enableParallel = payload && payload.enableParallel || 0
     state.tenantId = payload && payload.tenantId || -1
     state.processListS = payload && payload.processListS || []
     state.resourcesListS = payload && payload.resourcesListS || []

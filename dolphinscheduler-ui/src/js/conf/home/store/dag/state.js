@@ -33,6 +33,8 @@ export default {
   cacheTasks: {},
   // Timeout alarm
   timeout: 0,
+  // enable parallel (0:false;1:true)
+  enableParallel: 0,
   // tenant id
   tenantId:-1,
   // Node location information

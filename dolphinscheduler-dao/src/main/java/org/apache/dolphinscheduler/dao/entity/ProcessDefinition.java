@@ -403,6 +403,7 @@ public class ProcessDefinition {
                 ", receiversCc='" + receiversCc + '\'' +
                 ", scheduleReleaseState=" + scheduleReleaseState +
                 ", timeout=" + timeout +
+                ", enableParallel=" + enableParallel +
                 ", tenantId=" + tenantId +
                 ", modifyBy='" + modifyBy + '\'' +
                 '}';

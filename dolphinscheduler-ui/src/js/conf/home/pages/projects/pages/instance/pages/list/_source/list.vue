@@ -25,7 +25,7 @@
           <th scope="col" width="40">
             <span>{{$t('#')}}</span>
           </th>
-          <th scope="col">
+          <th scope="col" width="100">
             <span>{{$t('Process Name')}}</span>
           </th>
           <th scope="col" width="70">

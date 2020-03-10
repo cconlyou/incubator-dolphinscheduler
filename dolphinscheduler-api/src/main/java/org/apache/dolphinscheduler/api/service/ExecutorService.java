@@ -494,6 +494,8 @@ public class ExecutorService extends BaseService{
                 start = DateUtils.getScheduleDate(interval[0]);
                 end = DateUtils.getScheduleDate(interval[1]);
             }
+        }else{
+          command.setScheduleTime(new Date());
         }
 
         if(commandType == CommandType.COMPLEMENT_DATA){

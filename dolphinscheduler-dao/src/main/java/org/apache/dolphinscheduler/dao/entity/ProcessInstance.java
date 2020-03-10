@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import org.apache.dolphinscheduler.common.enums.*;
+import org.apache.dolphinscheduler.common.utils.DateUtils;
 
 import java.util.Date;
 import java.util.Objects;
@@ -239,7 +240,7 @@ public class ProcessInstance {
         this.processDefinition = processDefinition;
         this.name = processDefinition.getName() + "-" +
                 processDefinition.getVersion() + "-" +
-                System.currentTimeMillis();
+                DateUtils.getCurrentTime("yyMMddHHmmss");
     }
 
     public ProcessDefinition getProcessDefinition() {
