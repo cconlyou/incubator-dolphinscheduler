@@ -17,7 +17,62 @@
 <template>
   <div class="timing-process-model">
     <div class="title-box">
-      <span>{{$t('Set parameters before timing')}}</span>
+      <span>{{$t('Set parameters for trigger')}}</span>
+    </div>
+    <div class="clearfix list">
+      <div class="text">
+        {{$t('Trigger type')}}
+      </div>
+      <div class="cont">
+        <x-select
+                style="width: 200px;"
+                v-model="triggerType">
+          <x-option
+                  v-for="item in triggerTypeList"
+                  :key="item.code"
+                  :value="item.code"
+                  :label="item.desc">
+          </x-option>
+        </x-select>
+      </div>
+    </div>
+    <div v-if="triggerType == 'TIME_TRIGGER'" >
+      <div class="clearfix list">
+        <x-button type="info"  style="margin-left:20px" shape="circle" :loading="spinnerLoading" @click="preview()">{{$t('Execute time')}}</x-button>
+        <div class="text">
+          {{$t('Timing')}}
+        </div>
+
+        <div class="cont">
+          <template>
+            <x-poptip :ref="'poptip'" placement="bottom-start">
+              <div class="crontab-box">
+                <v-crontab v-model="crontab" :locale="i18n"></v-crontab>
+              </div>
+              <template slot="reference">
+                <x-input
+                        style="width: 360px;"
+                        type="text"
+                        readonly
+                        :value="crontab"
+                        autocomplete="off">
+                </x-input>
+              </template>
+            </x-poptip>
+          </template>
+        </div>
+      </div>
+      <div class="clearfix list">
+        <div style = "padding-left: 150px;">{{$t('Next five execution times')}}</div>
+        <ul style = "padding-left: 150px;">
+          <li v-for="(time,i) in previewTimes" :key='i'>{{time}}</li>
+        </ul>
+      </div>
+    </div>
+    <div v-if="triggerType == 'EVENT_TRIGGER'" >
+      <div class="clearfix list">
+        <div style = "padding-left: 150px; color:orange;">Please config other params in database before supported</div>
+      </div>
     </div>
     <div class="clearfix list">
       <div class="text">
@@ -36,38 +91,6 @@
         </x-datepicker>
       </div>
     </div>
-    <div class="clearfix list">
-      <x-button type="info"  style="margin-left:20px" shape="circle" :loading="spinnerLoading" @click="preview()">{{$t('Execute time')}}</x-button>
-      <div class="text">
-        {{$t('Timing')}}
-      </div>
-
-      <div class="cont">
-        <template>
-          <x-poptip :ref="'poptip'" placement="bottom-start">
-            <div class="crontab-box">
-              <v-crontab v-model="crontab" :locale="i18n"></v-crontab>
-            </div>
-            <template slot="reference">
-              <x-input
-                      style="width: 360px;"
-                      type="text"
-                      readonly
-                      :value="crontab"
-                      autocomplete="off">
-              </x-input>
-            </template>
-          </x-poptip>
-        </template>
-      </div>
-    </div>
-    <div class="clearfix list">
-      <div style = "padding-left: 150px;">{{$t('Next five execution times')}}</div>
-      <ul style = "padding-left: 150px;">
-        <li v-for="(time,i) in previewTimes" :key='i'>{{time}}</li>
-      </ul>
-    </div>
-
     <div class="clearfix list">
       <div class="text">
         {{$t('Failure Strategy')}}
@@ -162,6 +185,7 @@
   import mEmail from './email.vue'
   import store from '@/conf/home/store'
   import { warningTypeList } from './util'
+  import { triggerTypeEnum } from '@/conf/home/pages/dag/_source/config'
   import { vCrontab } from '@/module/components/crontab/index'
   import { formatDate } from '@/module/filter/filter'
   import mPriority from '@/module/components/priority/priority'
@@ -173,6 +197,8 @@
       return {
         store,
         processDefinitionId: 0,
+        triggerTypeList: triggerTypeEnum,
+        triggerType: 'TIME_TRIGGER',
         failureStrategy: 'CONTINUE',
         warningTypeList: warningTypeList,
         warningType: 'NONE',
@@ -221,6 +247,7 @@
         if (this._verification()) {
           let api = ''
           let searchParams = {
+            triggerType: this.triggerType,
             schedule: JSON.stringify({
               startTime: this.scheduleTime[0],
               endTime: this.scheduleTime[1],
@@ -336,9 +363,9 @@
     },
     mounted () {
       let item = this.item
-
       // Determine whether to echo
       if (this.item.crontab) {
+        this.triggerType = item.triggerType || 'TIME_TRIGGER'
         this.crontab = item.crontab
         this.scheduleTime = [formatDate(item.startTime), formatDate(item.endTime)]
         this.failureStrategy = item.failureStrategy

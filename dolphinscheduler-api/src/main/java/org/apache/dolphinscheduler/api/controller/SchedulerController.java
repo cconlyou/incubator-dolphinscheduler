@@ -23,6 +23,7 @@ import org.apache.dolphinscheduler.api.utils.Result;
 import org.apache.dolphinscheduler.common.enums.FailureStrategy;
 import org.apache.dolphinscheduler.common.enums.Priority;
 import org.apache.dolphinscheduler.common.enums.ReleaseState;
+import org.apache.dolphinscheduler.common.enums.TriggerType;
 import org.apache.dolphinscheduler.common.enums.WarningType;
 import org.apache.dolphinscheduler.common.utils.ParameterUtils;
 import org.apache.dolphinscheduler.dao.entity.User;
@@ -48,6 +49,7 @@ import static org.apache.dolphinscheduler.common.Constants.SESSION_USER;
 public class SchedulerController extends BaseController {
 
     private static final Logger logger = LoggerFactory.getLogger(SchedulerController.class);
+    public static final String DEFAULT_TRIGGER_TYPE = "TIME_TRIGGER";
     public static final String DEFAULT_WARNING_TYPE = "NONE";
     public static final String DEFAULT_NOTIFY_GROUP_ID = "1";
     public static final String DEFAULT_FAILURE_POLICY = "CONTINUE";
@@ -77,6 +79,7 @@ public class SchedulerController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "processDefinitionId", value = "PROCESS_DEFINITION_ID", required = true, dataType = "Int", example = "100"),
             @ApiImplicitParam(name = "schedule", value = "SCHEDULE", dataType = "Int", example = "100"),
+            @ApiImplicitParam(name = "triggerType", value = "TRIGGER_TYPE", type ="TriggerType"),
             @ApiImplicitParam(name = "warningType", value = "WARNING_TYPE", type ="WarningType"),
             @ApiImplicitParam(name = "warningGroupId", value = "WARNING_GROUP_ID", dataType = "Int", example = "100"),
             @ApiImplicitParam(name = "failureStrategy", value = "FAILURE_STRATEGY", type ="FailureStrategy"),
@@ -91,6 +94,7 @@ public class SchedulerController extends BaseController {
                                  @ApiParam(name = "projectName", value = "PROJECT_NAME", required = true) @PathVariable String projectName,
                                  @RequestParam(value = "processDefinitionId") Integer processDefinitionId,
                                  @RequestParam(value = "schedule") String schedule,
+                                 @RequestParam(value = "triggerType", required = false, defaultValue = DEFAULT_TRIGGER_TYPE) TriggerType triggerType,
                                  @RequestParam(value = "warningType", required = false, defaultValue = DEFAULT_WARNING_TYPE) WarningType warningType,
                                  @RequestParam(value = "warningGroupId", required = false, defaultValue = DEFAULT_NOTIFY_GROUP_ID) int warningGroupId,
                                  @RequestParam(value = "failureStrategy", required = false, defaultValue = DEFAULT_FAILURE_POLICY) FailureStrategy failureStrategy,
@@ -98,12 +102,12 @@ public class SchedulerController extends BaseController {
                                  @RequestParam(value = "receiversCc", required = false) String receiversCc,
                                  @RequestParam(value = "workerGroupId", required = false, defaultValue = "-1") int workerGroupId,
                                  @RequestParam(value = "processInstancePriority", required = false) Priority processInstancePriority) {
-        logger.info("login user {}, project name: {}, process name: {}, create schedule: {}, warning type: {}, warning group id: {}," +
+        logger.info("login user {}, project name: {}, process id: {},trigger type: {}, create schedule: {}, warning type: {}, warning group id: {}," +
                         "failure policy: {},receivers : {},receiversCc : {},processInstancePriority : {}, workGroupId:{}",
-                loginUser.getUserName(), projectName, processDefinitionId, schedule, warningType, warningGroupId,
+                loginUser.getUserName(), projectName, processDefinitionId, triggerType, schedule, warningType, warningGroupId,
                 failureStrategy, receivers, receiversCc, processInstancePriority, workerGroupId);
         try {
-            Map<String, Object> result = schedulerService.insertSchedule(loginUser, projectName, processDefinitionId, schedule,
+            Map<String, Object> result = schedulerService.insertSchedule(loginUser, projectName, processDefinitionId, schedule, triggerType,
                     warningType, warningGroupId, failureStrategy, receivers, receiversCc, processInstancePriority, workerGroupId);
 
             return returnDataList(result);
@@ -133,6 +137,7 @@ public class SchedulerController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "SCHEDULE_ID", required = true, dataType = "Int", example = "100"),
             @ApiImplicitParam(name = "schedule", value = "SCHEDULE", dataType = "Int", example = "100"),
+            @ApiImplicitParam(name = "triggerType", value = "TRIGGER_TYPE", type ="TriggerType"),
             @ApiImplicitParam(name = "warningType", value = "WARNING_TYPE", type ="WarningType"),
             @ApiImplicitParam(name = "warningGroupId", value = "WARNING_GROUP_ID", dataType = "Int", example = "100"),
             @ApiImplicitParam(name = "failureStrategy", value = "FAILURE_STRATEGY", type ="FailureStrategy"),
@@ -146,6 +151,7 @@ public class SchedulerController extends BaseController {
                                  @ApiParam(name = "projectName", value = "PROJECT_NAME", required = true) @PathVariable String projectName,
                                  @RequestParam(value = "id") Integer id,
                                  @RequestParam(value = "schedule") String schedule,
+                                 @RequestParam(value = "triggerType", required = false, defaultValue = DEFAULT_TRIGGER_TYPE) TriggerType triggerType,
                                  @RequestParam(value = "warningType", required = false, defaultValue = DEFAULT_WARNING_TYPE) WarningType warningType,
                                  @RequestParam(value = "warningGroupId", required = false) int warningGroupId,
                                  @RequestParam(value = "failureStrategy", required = false, defaultValue = "END") FailureStrategy failureStrategy,
@@ -153,13 +159,13 @@ public class SchedulerController extends BaseController {
                                  @RequestParam(value = "receiversCc", required = false) String receiversCc,
                                  @RequestParam(value = "workerGroupId", required = false, defaultValue = "-1") int workerGroupId,
                                  @RequestParam(value = "processInstancePriority", required = false) Priority processInstancePriority) {
-        logger.info("login user {}, project name: {},id: {}, updateProcessInstance schedule: {}, notify type: {}, notify mails: {}, " +
+        logger.info("login user {}, project name: {}, process id: {}, update schedule info: {}, trigger type: {}, notify type: {}, notify mails: {}, " +
                         "failure policy: {},receivers : {},receiversCc : {},processInstancePriority : {},workerGroupId:{}",
-                loginUser.getUserName(), projectName, id, schedule, warningType, warningGroupId, failureStrategy,
+                loginUser.getUserName(), projectName, id, schedule, triggerType, warningType, warningGroupId, failureStrategy,
                 receivers, receiversCc, processInstancePriority, workerGroupId);
 
         try {
-            Map<String, Object> result = schedulerService.updateSchedule(loginUser, projectName, id, schedule,
+            Map<String, Object> result = schedulerService.updateSchedule(loginUser, projectName, id, schedule, triggerType,
                     warningType, warningGroupId, failureStrategy, receivers, receiversCc, null, processInstancePriority, workerGroupId);
             return returnDataList(result);
 

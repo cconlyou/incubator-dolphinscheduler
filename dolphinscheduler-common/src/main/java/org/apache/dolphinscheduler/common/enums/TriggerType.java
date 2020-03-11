@@ -28,7 +28,7 @@ public enum TriggerType {
      * 1 time trigger
      * 2 event trigger
      */
-     TIME_TRRIGGER(1,"Quartz(time trigger)")
+     TIME_TRIGGER(1,"Quartz(time trigger)")
     ,EVENT_TRIGGER(2,"event trigger")
     ;
 
@@ -48,4 +48,5 @@ public enum TriggerType {
     public String getDescp() {
         return descp;
     }
+
 }

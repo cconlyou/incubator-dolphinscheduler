@@ -294,11 +294,24 @@ let tasksType = {
   }
 }
 
+let triggerTypeEnum = [
+  {
+    id: '1',
+    code: 'TIME_TRIGGER',
+    desc: `${i18n.$t('Time trigger')}`
+  },
+  {
+    id: '2',
+    code: 'EVENT_TRIGGER',
+    desc: `${i18n.$t('Event trigger')}`
+  }
+]
 
 export {
   toolOper,
   publishStatus,
   runningType,
   tasksState,
-  tasksType
+  tasksType,
+  triggerTypeEnum
 }

@@ -93,6 +93,9 @@ public class ProcessDefinitionService extends BaseDAGService {
 
     @Autowired
     private ScheduleMapper scheduleMapper;
+    
+    @Autowired
+    private SchedulerService schedulerService;
 
     @Autowired
     private ProcessService processService;
@@ -472,7 +475,7 @@ public class ProcessDefinitionService extends BaseDAGService {
                     // set status
                     schedule.setReleaseState(ReleaseState.OFFLINE);
                     scheduleMapper.updateById(schedule);
-                    SchedulerService.deleteSchedule(project.getId(), schedule.getId());
+                    schedulerService.deleteSchedule(project.getId(), schedule.getId());
                 }
                 break;
             }

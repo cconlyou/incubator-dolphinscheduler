@@ -68,7 +68,7 @@ export default {
   'Project Home': 'Project Home',
   'Project Manage': 'Project',
   'Create Project': 'Create Project',
-  'Cron Manage': 'Cron Manage',
+  'Trigger Manage': 'Trigger Manage',
   'Tenant Manage': 'Tenant Manage',
   'Create Tenant': 'Create Tenant',
   'User Manage': 'User Manage',
@@ -366,7 +366,7 @@ export default {
   'Mode of execution': 'Mode of execution',
   'Serial execution': 'Serial execution',
   'Parallel execution': 'Parallel execution',
-  'Set parameters before timing': 'Set parameters before timing',
+  'Set parameters for trigger': 'Set parameters for trigger',
   'Start and stop time': 'Start and stop time',
   'Please select time': 'Please select time',
   'Please enter crontab': 'Please enter crontab',
@@ -569,5 +569,8 @@ export default {
   'Modify User': 'Modify User',
   'Branch flow': 'Branch flow',
   'Cannot select the same node for successful branch flow and failed branch flow': 'Cannot select the same node for successful branch flow and failed branch flow',
-  'enable parallel': 'enable parallel'
+  'enable parallel': 'enable parallel',
+  'Trigger type': 'Trigger type',
+  'Time trigger': 'Time trigger',
+  'Event trigger': 'Event trigger'
 }

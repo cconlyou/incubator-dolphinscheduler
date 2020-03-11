@@ -31,13 +31,16 @@
                 <span>{{$t('Process Name')}}</span>
               </th>
               <th>
+                <span>{{$t('Trigger type')}}</span>
+              </th>
+              <th>
                 <span>{{$t('Start Time')}}</span>
               </th>
               <th>
                 <span>{{$t('End Time')}}</span>
               </th>
               <th>
-                <span>{{$t('crontab')}}</span>
+                <span>{{$t('crontab')}}/event</span>
               </th>
               <th>
                 <span>{{$t('Failure Strategy')}}</span>
@@ -63,13 +66,16 @@
                 <span><a href="javascript:">{{item.processDefinitionName}}</a></span>
               </td>
               <td>
+                <span>{{_rtTriggerType(item.triggerType)}}</span>
+              </td>
+              <td>
                 <span>{{item.startTime | formatDate}}</span>
               </td>
               <td>
                 <span>{{item.endTime | formatDate}}</span>
               </td>
               <td>
-                <span>{{item.crontab}}</span>
+                <span>{{item.triggerType == 'TIME_TRIGGER' ? item.crontab : 'EVENT(TODO)'}}</span>
               </td>
               <td>
                 <span>{{item.failureStrategy}}</span>
@@ -156,7 +162,7 @@
   import mSpin from '@/module/components/spin/spin'
   import mTiming from '../../pages/list/_source/timing'
   import mNoData from '@/module/components/noData/noData'
-  import { publishStatus } from '@/conf/home/pages/dag/_source/config'
+  import { publishStatus,triggerTypeEnum } from '@/conf/home/pages/dag/_source/config'
 
   export default {
     name: 'list',
@@ -199,6 +205,12 @@
        */
       _rtReleaseState (code) {
         return _.filter(publishStatus, v => v.code === code)[0].desc
+      },
+      /**
+       * return trigger type
+       */
+      _rtTriggerType (code) {
+        return _.filter(triggerTypeEnum, v => v.code === code)[0].desc
       },
       /**
        * page

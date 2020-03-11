@@ -68,7 +68,7 @@ export default {
   'Project Home': '项目首页',
   'Project Manage': '项目管理',
   'Create Project': '创建项目',
-  'Cron Manage': '定时管理',
+  'Trigger Manage': '触发器管理',
   'Tenant Manage': '租户管理',
   'Create Tenant': '创建租户',
   'User Manage': '用户管理',
@@ -361,7 +361,7 @@ export default {
   'Mode of execution': '执行方式',
   'Serial execution': '串行执行',
   'Parallel execution': '并行执行',
-  'Set parameters before timing': '定时前请先设置参数',
+  'Set parameters for trigger': '请先设置触发器参数',
   'Start and stop time': '起止时间',
   'Please select time': '请选择时间',
   'Please enter crontab': '请输入crontab',
@@ -569,5 +569,8 @@ export default {
   'Modify User': '修改用户',
   'Branch flow': '分支流转',
   'Cannot select the same node for successful branch flow and failed branch flow': '成功分支流转和失败分支流转不能选择同一个节点',
-  'enable parallel': '能否并行'
+  'enable parallel': '能否并行',
+  'Trigger type': '触发器类型',
+  'Time trigger': '时间触发器',
+  'Event trigger': '事件触发器'
 }

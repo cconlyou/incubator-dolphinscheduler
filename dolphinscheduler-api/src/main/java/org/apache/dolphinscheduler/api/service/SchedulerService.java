@@ -86,6 +86,7 @@ public class SchedulerService extends BaseService {
      * @param projectName project name
      * @param processDefineId process definition id
      * @param schedule scheduler
+     * @param triggerType  trigger type
      * @param warningType  warning type
      * @param warningGroupId warning group id
      * @param failureStrategy failure strategy
@@ -100,6 +101,7 @@ public class SchedulerService extends BaseService {
     public Map<String, Object> insertSchedule(User loginUser, String projectName,
                                               Integer processDefineId,
                                               String schedule,
+                                              TriggerType triggerType,
                                               WarningType warningType,
                                               int warningGroupId,
                                               FailureStrategy failureStrategy,
@@ -147,6 +149,7 @@ public class SchedulerService extends BaseService {
             return result;
         }
         scheduleObj.setCrontab(scheduleParam.getCrontab());
+        scheduleObj.setTriggerType(triggerType);
         scheduleObj.setWarningType(warningType);
         scheduleObj.setWarningGroupId(warningGroupId);
         scheduleObj.setFailureStrategy(failureStrategy);
@@ -179,6 +182,7 @@ public class SchedulerService extends BaseService {
      * @param projectName project name
      * @param id scheduler id
      * @param scheduleExpression scheduler
+     * @param triggerType trigger type
      * @param warningType warning type
      * @param warningGroupId warning group id
      * @param failureStrategy failure strategy
@@ -195,6 +199,7 @@ public class SchedulerService extends BaseService {
                                               String projectName,
                                               Integer id,
                                               String scheduleExpression,
+                                              TriggerType triggerType,
                                               WarningType warningType,
                                               int warningGroupId,
                                               FailureStrategy failureStrategy,
@@ -251,6 +256,10 @@ public class SchedulerService extends BaseService {
                 return result;
             }
             schedule.setCrontab(scheduleParam.getCrontab());
+        }
+
+        if (triggerType != null) {
+          schedule.setTriggerType(triggerType);
         }
 
         if (warningType != null) {
@@ -321,6 +330,7 @@ public class SchedulerService extends BaseService {
             putMsg(result, Status.SCHEDULE_CRON_REALEASE_NEED_NOT_CHANGE, scheduleStatus);
             return result;
         }
+        // TODO when event trigger : processId is groupId actually 
         ProcessDefinition processDefinition = processService.findProcessDefineById(scheduleObj.getProcessDefinitionId());
         if (processDefinition == null) {
             putMsg(result, Status.PROCESS_DEFINE_NOT_EXIST, scheduleObj.getProcessDefinitionId());
@@ -476,6 +486,9 @@ public class SchedulerService extends BaseService {
         if (schedule == null) {
             logger.warn("process schedule info not exists");
             return;
+        } else if (schedule.getTriggerType() == TriggerType.EVENT_TRIGGER){
+          logger.warn("schedule[{}] is event trigger. Crontab[{}] is not useful",schedule.getId(),schedule.getCrontab());
+          return;
         }
 
         Date startDate = schedule.getStartTime();
@@ -498,9 +511,13 @@ public class SchedulerService extends BaseService {
      * @param scheduleId schedule id
      * @throws RuntimeException runtime exception
      */
-    public static void deleteSchedule(int projectId, int scheduleId) throws RuntimeException{
+    public void deleteSchedule(int projectId, int scheduleId) throws RuntimeException{
         logger.info("delete schedules of project id:{}, schedule id:{}", projectId, scheduleId);
 
+        Schedule schedule = processService.querySchedule(scheduleId);
+        if(schedule.getTriggerType() == TriggerType.EVENT_TRIGGER){
+          return;
+        }
         String jobName = QuartzExecutors.buildJobName(scheduleId);
         String jobGroupName = QuartzExecutors.buildJobGroupName(projectId);
 

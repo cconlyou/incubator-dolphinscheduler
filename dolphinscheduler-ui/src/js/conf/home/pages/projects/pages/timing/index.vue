@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 <template>
-  <m-list-construction :title="$t('Cron Manage')">
+  <m-list-construction :title="$t('Trigger Manage')">
     <template slot="content">
       <m-list></m-list>
     </template>

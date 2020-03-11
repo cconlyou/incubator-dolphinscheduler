@@ -38,7 +38,7 @@ public class Schedule {
   @TableId(value="id", type=IdType.AUTO)
   private int id;
 
-  private TriggerType triggerType = TriggerType.TIME_TRRIGGER;
+  private TriggerType triggerType = TriggerType.TIME_TRIGGER;
 
   /**
    * process definition id
@@ -286,6 +286,7 @@ public class Schedule {
             ", processDefinitionName='" + processDefinitionName + '\'' +
             ", projectName='" + projectName + '\'' +
             ", description='" + definitionDescription + '\'' +
+            ", triggerType='" + triggerType + '\'' +
             ", startTime=" + startTime +
             ", endTime=" + endTime +
             ", crontab='" + crontab + '\'' +
