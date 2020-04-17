@@ -17,13 +17,43 @@
 package org.apache.dolphinscheduler.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+
+import java.util.List;
 
 import org.apache.dolphinscheduler.dao.entity.TriggerGroupMember;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * task event trigger configuration : group member info
  */
 public interface TriggerGroupMemberMapper extends BaseMapper<TriggerGroupMember> {
- 
+
+  int countMembers(@Param("projectName") String projectName
+                  ,@Param("groupName") String groupName
+                  ,@Param("enableFlag") Integer enableFlag);
+
+  List<TriggerGroupMember> queryByGroup(@Param("userId") Integer userId
+                                   ,@Param("triProjectName") String triProjectName
+                                   ,@Param("groupName") String groupName
+                                   ,@Param("enableFlag") Integer enableFlag);
+
+  List<TriggerGroupMember> queryByMember(@Param("userId") Integer userId
+                                  ,@Param("groupName") String groupName
+                                  ,@Param("projectName") String projectName
+                                  ,@Param("processDefName") String processDefName
+                                  ,@Param("enableFlag") Integer enableFlag);
+
+  IPage<TriggerGroupMember> queryListPaging(IPage<TriggerGroupMember> page,
+                                     @Param("searchVal") String searchVal,
+                                     @Param("userId") int userId,
+                                     @Param("projectId") int projectId,
+                                     @Param("groupName") String groupName,
+                                     @Param("enableFlag") Integer enableFlag,
+                                     @Param("isAdmin") boolean isAdmin);
+
+  int deleteMembers(@Param("projectName") String projectName
+                   ,@Param("groupName") String groupName
+                   ,@Param("enableFlag") Integer enableFlag);
 
 }

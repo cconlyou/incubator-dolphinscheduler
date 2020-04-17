@@ -27,31 +27,31 @@
               <th>
                 <span>{{$t('#')}}</span>
               </th>
-              <th>
+              <th width="240">
                 <span>{{$t('Process Name')}}</span>
               </th>
-              <th>
-                <span>{{$t('Trigger type')}}</span>
+              <th width="90">
+                <span>{{$t('Trigger Type')}}</span>
               </th>
-              <th>
+              <th width="70">
                 <span>{{$t('Start Time')}}</span>
               </th>
-              <th>
+              <th width="70">
                 <span>{{$t('End Time')}}</span>
               </th>
               <th>
-                <span>{{$t('crontab')}}/event</span>
+                <span>{{$t('crontab')}}/{{$t('Trigger group')}}</span>
               </th>
-              <th>
+              <th width="80">
                 <span>{{$t('Failure Strategy')}}</span>
               </th>
               <th>
                 <span>{{$t('State')}}</span>
               </th>
-              <th>
+              <th width="70">
                 <span>{{$t('Create Time')}}</span>
               </th>
-              <th>
+              <th width="70">
                 <span>{{$t('Update Time')}}</span>
               </th>
               <th width="120">
@@ -75,7 +75,7 @@
                 <span>{{item.endTime | formatDate}}</span>
               </td>
               <td>
-                <span>{{item.triggerType == 'TIME_TRIGGER' ? item.crontab : 'EVENT(TODO)'}}</span>
+                <span>{{item.triggerType == 'TIME_TRIGGER' ? item.crontab : 'TODO'}}</span>
               </td>
               <td>
                 <span>{{item.failureStrategy}}</span>
@@ -97,6 +97,7 @@
                         data-toggle="tooltip"
                         :title="$t('Edit')"
                         @click="_editTiming(item)"
+                        @on-jump="_onJump2TriggerGroup"
                         icon="ans-icon-edit"
                         :disabled="item.releaseState === 'ONLINE'" >
                 </x-button>
@@ -176,6 +177,7 @@
       }
     },
     props: {
+      upParams: Object
     },
     methods: {
       ...mapActions('dag', ['getScheduleList', 'scheduleOffline', 'scheduleOnline', 'getReceiver','deleteTiming']),
@@ -243,6 +245,15 @@
         }).catch(e => {
           this.isLoading = false
         })
+      },
+      _setUpParams(){
+        let params = {
+          enableNew : false
+        }
+        if(!this.list.length){
+          params.enableNew = true
+        }
+        this.$emit('toParent',params)
       },
       /**
        * search
@@ -315,6 +326,14 @@
                   },
                   close () {
                     modal.remove()
+                  },
+                  onJump (info) {
+                    modal.remove()
+                    let params = {
+                       triProcessDefId: info.processDefinitionId
+                      ,isPopUp:true
+                    }
+                    self.$router.push({ path: '/projects/event-trigger/group/list', query:{jumpParams:params}})
                   }
                 },
                 props: {
@@ -328,7 +347,11 @@
         })
       }
     },
-    watch: {},
+    watch: {
+      list (value) {
+        this._setUpParams()
+      }
+    },
     created () {
       this._getScheduleList()
     },

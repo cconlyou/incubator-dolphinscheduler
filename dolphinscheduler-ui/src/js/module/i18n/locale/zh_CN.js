@@ -170,7 +170,7 @@ export default {
   'Please enter tenant code in English': '请输入英文租户编码',
   'Edit User': '编辑用户',
   'Tenant': '租户',
-  'Email': '邮件',
+  'Email': '邮箱',
   'Phone': '手机',
   'Please enter phone number': '请输入手机',
   'Please enter email': '请输入邮箱',
@@ -183,6 +183,7 @@ export default {
   'Edit alarm group': '编辑告警组',
   'Create alarm group': '创建告警组',
   'Group Name': '组名称',
+  'Group Description': '组描述',
   'Please enter group name': '请输入组名称',
   'Group Type': '组类型',
   'Remarks': '备注',
@@ -309,6 +310,7 @@ export default {
   'Waiting for thread': '等待线程',
   'Waiting for dependence': '等待依赖',
   'Start': '运行',
+  'Manual Start': '手工运行',
   'Copy': '复制节点',
   'Copy name': '复制名称',
   'Delete': '删除',
@@ -570,7 +572,28 @@ export default {
   'Branch flow': '分支流转',
   'Cannot select the same node for successful branch flow and failed branch flow': '成功分支流转和失败分支流转不能选择同一个节点',
   'enable parallel': '能否并行',
-  'Trigger type': '触发器类型',
+  'Create Trigger': 'Create Trigger',
+  'Trigger Type': '触发器类型',
   'Time trigger': '时间触发器',
-  'Event trigger': '事件触发器'
+  'Event trigger': '事件触发器',
+  'Trigger group': '事件触发组',
+  'Trigger GrpMember': '事件触发组员',
+  'Trigger State': '触发器状态',
+  'Event Trigger Process': 'Process触发',
+  'Event Trigger Task': 'Task触发',
+  'Enable Flag': '生效标识',
+  'Enabled': '启用',
+  'Disabled': '停用',
+  'Create Event Trigger Group': '创建事件触发组'
+  ,'No Event Trigger Group': '无事件触发组，请不要忘记创建'
+  ,'Please Enter': '请输入'
+  ,'Trigger Time Type': '触发日期格式'
+  ,'Please Select': '请选择'
+  ,'Group Members Manage': '组成员管理'
+  ,'Project info of Member': '组成员所属项目'
+  ,'Process info of Member': '组成员工作流'
+  ,'SubTask info of Member': '组成员子任务'
+  ,'It will be deleted actually after submit': '在提交后才会真正删除'
+  ,'#Group': '组内序号'
+  ,'It will jump to another page': '将会跳转到其他页面进行配置'
 }

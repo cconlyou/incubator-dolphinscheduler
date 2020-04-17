@@ -307,11 +307,73 @@ let triggerTypeEnum = [
   }
 ]
 
+let eventTriggerTypeEnum = [
+  {
+    id: '21',
+    code: 'EVENT_TRIGGER_PROCESS',
+    desc: `${i18n.$t('Event Trigger Process')}`
+  },
+  {
+    id: '22',
+    code: 'EVENT_TRIGGER_TASK',
+    desc: `${i18n.$t('Event Trigger Task')}`
+  }
+]
+
+let enableFlagEnum = [
+  {
+    id: 1,
+    code: 'Enabled',
+    desc: `${i18n.$t('Enabled')}`
+  },
+  {
+    id: 0,
+    code: 'Disabled',
+    desc: `${i18n.$t('Disabled')}`
+  }
+]
+
+let triTimeTypeEnum = [
+  {
+    id: 1,
+    code: 'DD',
+    desc: 'Day'
+  },
+  {
+    id: 2,
+    code: 'MM',
+    desc: 'Month'
+  },
+  {
+    id: 3,
+    code: 'HH',
+    desc: 'Hour'
+  },
+  {
+    id: 4,
+    code: 'YY',
+    desc: 'Year'
+  },
+  {
+    id: 5,
+    code: 'MI',
+    desc: 'Minute'
+  },
+  {
+    id: 6,
+    code: 'SS',
+    desc: 'Second'
+  }
+]
+
 export {
   toolOper,
   publishStatus,
   runningType,
   tasksState,
   tasksType,
-  triggerTypeEnum
+  triggerTypeEnum,
+  eventTriggerTypeEnum,
+  enableFlagEnum,
+  triTimeTypeEnum
 }

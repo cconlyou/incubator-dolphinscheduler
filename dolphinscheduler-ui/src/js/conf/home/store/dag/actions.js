@@ -284,7 +284,7 @@ export default {
   getProjectList ({ state }, payload) {
     return new Promise((resolve, reject) => {
       if (state.projectListS.length) {
-      resolve()
+      resolve(state.projectListS)
       return
     }
     io.get(`projects/query-project-list`, payload, res => {

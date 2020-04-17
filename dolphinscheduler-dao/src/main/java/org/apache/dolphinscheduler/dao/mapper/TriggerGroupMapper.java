@@ -17,13 +17,30 @@
 package org.apache.dolphinscheduler.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+
+import java.util.List;
 
 import org.apache.dolphinscheduler.dao.entity.TriggerGroup;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * task event trigger configuration : group info
  */
 public interface TriggerGroupMapper extends BaseMapper<TriggerGroup> {
- 
+
+  TriggerGroup queryByName(@Param("groupName") String groupName);
+
+  List<TriggerGroup> queryAll(@Param("userId") int userId
+                             ,@Param("projectId") int projectId
+                             ,@Param("processDefId") Integer processDefId
+                             ,@Param("enableFlag") Integer enableFlag);
+
+  IPage<TriggerGroup> queryListPaging(IPage<TriggerGroup> page,
+                                     @Param("searchVal") String searchVal,
+                                     @Param("userId") int userId,
+                                     @Param("projectId") int projectId,
+                                     @Param("enableFlag") Integer enableFlag,
+                                     @Param("isAdmin") boolean isAdmin);
 
 }

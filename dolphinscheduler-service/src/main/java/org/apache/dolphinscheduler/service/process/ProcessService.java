@@ -355,7 +355,7 @@ public class ProcessService {
                     processInstance.getWarningGroupId(),
                     processInstance.getScheduleTime(),
                     processInstance.getProcessInstancePriority()
-            );
+                    );
             saveCommand(command);
             return ;
         }
@@ -400,8 +400,8 @@ public class ProcessService {
      * @return process instance
      */
     private ProcessInstance generateNewProcessInstance(ProcessDefinition processDefinition,
-                                                       Command command,
-                                                       Map<String, String> cmdParam){
+            Command command,
+            Map<String, String> cmdParam){
         ProcessInstance processInstance = new ProcessInstance(processDefinition);
         processInstance.setState(ExecutionStatus.RUNNING_EXEUTION);
         processInstance.setRecovery(Flag.NO);
@@ -568,78 +568,78 @@ public class ProcessService {
         ExecutionStatus runStatus = ExecutionStatus.RUNNING_EXEUTION;
         int runTime = processInstance.getRunTimes();
         switch (commandType){
-            case START_PROCESS:
-                break;
-            case START_FAILURE_TASK_PROCESS:
-                // find failed tasks and init these tasks
-                List<Integer> failedList = this.findTaskIdByInstanceState(processInstance.getId(), ExecutionStatus.FAILURE);
-                List<Integer> toleranceList = this.findTaskIdByInstanceState(processInstance.getId(), ExecutionStatus.NEED_FAULT_TOLERANCE);
-                List<Integer> killedList = this.findTaskIdByInstanceState(processInstance.getId(), ExecutionStatus.KILL);
-                cmdParam.remove(Constants.CMDPARAM_RECOVERY_START_NODE_STRING);
+        case START_PROCESS:
+            break;
+        case START_FAILURE_TASK_PROCESS:
+            // find failed tasks and init these tasks
+            List<Integer> failedList = this.findTaskIdByInstanceState(processInstance.getId(), ExecutionStatus.FAILURE);
+            List<Integer> toleranceList = this.findTaskIdByInstanceState(processInstance.getId(), ExecutionStatus.NEED_FAULT_TOLERANCE);
+            List<Integer> killedList = this.findTaskIdByInstanceState(processInstance.getId(), ExecutionStatus.KILL);
+            cmdParam.remove(Constants.CMDPARAM_RECOVERY_START_NODE_STRING);
 
-                failedList.addAll(killedList);
-                failedList.addAll(toleranceList);
-                for(Integer taskId : failedList){
-                    initTaskInstance(this.findTaskInstanceById(taskId));
-                }
-                cmdParam.put(Constants.CMDPARAM_RECOVERY_START_NODE_STRING,
-                        String.join(Constants.COMMA, convertIntListToString(failedList)));
-                processInstance.setCommandParam(JSONUtils.toJson(cmdParam));
-                processInstance.setRunTimes(runTime +1 );
-                break;
-            case START_CURRENT_TASK_PROCESS:
-                break;
-            case RECOVER_WAITTING_THREAD:
-                break;
-            case RECOVER_SUSPENDED_PROCESS:
-                // find pause tasks and init task's state
+            failedList.addAll(killedList);
+            failedList.addAll(toleranceList);
+            for(Integer taskId : failedList){
+                initTaskInstance(this.findTaskInstanceById(taskId));
+            }
+            cmdParam.put(Constants.CMDPARAM_RECOVERY_START_NODE_STRING,
+                    String.join(Constants.COMMA, convertIntListToString(failedList)));
+            processInstance.setCommandParam(JSONUtils.toJson(cmdParam));
+            processInstance.setRunTimes(runTime +1 );
+            break;
+        case START_CURRENT_TASK_PROCESS:
+            break;
+        case RECOVER_WAITTING_THREAD:
+            break;
+        case RECOVER_SUSPENDED_PROCESS:
+            // find pause tasks and init task's state
+            cmdParam.remove(Constants.CMDPARAM_RECOVERY_START_NODE_STRING);
+            List<Integer> suspendedNodeList = this.findTaskIdByInstanceState(processInstance.getId(), ExecutionStatus.PAUSE);
+            List<Integer> stopNodeList = findTaskIdByInstanceState(processInstance.getId(),
+                    ExecutionStatus.KILL);
+            suspendedNodeList.addAll(stopNodeList);
+            for(Integer taskId : suspendedNodeList){
+                // initialize the pause state
+                initTaskInstance(this.findTaskInstanceById(taskId));
+            }
+            cmdParam.put(Constants.CMDPARAM_RECOVERY_START_NODE_STRING, String.join(",", convertIntListToString(suspendedNodeList)));
+            processInstance.setCommandParam(JSONUtils.toJson(cmdParam));
+            processInstance.setRunTimes(runTime +1);
+            break;
+        case RECOVER_TOLERANCE_FAULT_PROCESS:
+            // recover tolerance fault process
+            processInstance.setRecovery(Flag.YES);
+            runStatus = processInstance.getState();
+            break;
+        case COMPLEMENT_DATA:
+            // delete all the valid tasks when complement data
+            List<TaskInstance> taskInstanceList = this.findValidTaskListByProcessId(processInstance.getId());
+            for(TaskInstance taskInstance : taskInstanceList){
+                taskInstance.setFlag(Flag.NO);
+                this.updateTaskInstance(taskInstance);
+            }
+            break;
+        case REPEAT_RUNNING:
+            // delete the recover task names from command parameter
+            if(cmdParam.containsKey(Constants.CMDPARAM_RECOVERY_START_NODE_STRING)){
                 cmdParam.remove(Constants.CMDPARAM_RECOVERY_START_NODE_STRING);
-                List<Integer> suspendedNodeList = this.findTaskIdByInstanceState(processInstance.getId(), ExecutionStatus.PAUSE);
-                List<Integer> stopNodeList = findTaskIdByInstanceState(processInstance.getId(),
-                        ExecutionStatus.KILL);
-                suspendedNodeList.addAll(stopNodeList);
-                for(Integer taskId : suspendedNodeList){
-                    // initialize the pause state
-                    initTaskInstance(this.findTaskInstanceById(taskId));
-                }
-                cmdParam.put(Constants.CMDPARAM_RECOVERY_START_NODE_STRING, String.join(",", convertIntListToString(suspendedNodeList)));
                 processInstance.setCommandParam(JSONUtils.toJson(cmdParam));
-                processInstance.setRunTimes(runTime +1);
-                break;
-            case RECOVER_TOLERANCE_FAULT_PROCESS:
-                // recover tolerance fault process
-                processInstance.setRecovery(Flag.YES);
-                runStatus = processInstance.getState();
-                break;
-            case COMPLEMENT_DATA:
-                // delete all the valid tasks when complement data
-                List<TaskInstance> taskInstanceList = this.findValidTaskListByProcessId(processInstance.getId());
-                for(TaskInstance taskInstance : taskInstanceList){
-                    taskInstance.setFlag(Flag.NO);
-                    this.updateTaskInstance(taskInstance);
-                }
-                break;
-            case REPEAT_RUNNING:
-                // delete the recover task names from command parameter
-                if(cmdParam.containsKey(Constants.CMDPARAM_RECOVERY_START_NODE_STRING)){
-                    cmdParam.remove(Constants.CMDPARAM_RECOVERY_START_NODE_STRING);
-                    processInstance.setCommandParam(JSONUtils.toJson(cmdParam));
-                }
-                // delete all the valid tasks when repeat running
-                List<TaskInstance> validTaskList = findValidTaskListByProcessId(processInstance.getId());
-                for(TaskInstance taskInstance : validTaskList){
-                    taskInstance.setFlag(Flag.NO);
-                    updateTaskInstance(taskInstance);
-                }
-                processInstance.setStartTime(new Date());
-                processInstance.setEndTime(null);
-                processInstance.setRunTimes(runTime +1);
-                initComplementDataParam(processDefinition, processInstance, cmdParam);
-                break;
-            case SCHEDULER:
-                break;
-            default:
-                break;
+            }
+            // delete all the valid tasks when repeat running
+            List<TaskInstance> validTaskList = findValidTaskListByProcessId(processInstance.getId());
+            for(TaskInstance taskInstance : validTaskList){
+                taskInstance.setFlag(Flag.NO);
+                updateTaskInstance(taskInstance);
+            }
+            processInstance.setStartTime(new Date());
+            processInstance.setEndTime(null);
+            processInstance.setRunTimes(runTime +1);
+            initComplementDataParam(processDefinition, processInstance, cmdParam);
+            break;
+        case SCHEDULER:
+            break;
+        default:
+            break;
         }
         processInstance.setState(runStatus);
         return processInstance;
@@ -666,8 +666,8 @@ public class ProcessService {
      * @param cmdParam cmdParam
      */
     private void initComplementDataParam(ProcessDefinition processDefinition,
-                                         ProcessInstance processInstance,
-                                         Map<String, String> cmdParam) {
+            ProcessInstance processInstance,
+            Map<String, String> cmdParam) {
         if(!processInstance.isComplementData()){
             return;
         }
@@ -829,7 +829,7 @@ public class ProcessService {
      * @return process instance map
      */
     private ProcessInstanceMap findPreviousTaskProcessMap(ProcessInstance parentProcessInstance,
-                                                          TaskInstance parentTask) {
+            TaskInstance parentTask) {
 
         Integer preTaskId = 0;
         List<TaskInstance> preTaskList = this.findPreviousTaskListByWorkProcessId(parentProcessInstance.getId());
@@ -853,7 +853,7 @@ public class ProcessService {
      * @param task task
      */
     private void createSubWorkProcessCommand(ProcessInstance parentProcessInstance,
-                                             TaskInstance task){
+            TaskInstance task){
         if(!task.isSubProcess()){
             return;
         }
@@ -1020,9 +1020,9 @@ public class ProcessService {
         StringBuilder sb = new StringBuilder(100);
 
         sb.append(processInstance.getProcessInstancePriority().ordinal()).append(Constants.UNDERLINE)
-                .append(taskInstance.getProcessInstanceId()).append(Constants.UNDERLINE)
-                .append(taskInstance.getTaskInstancePriority().ordinal()).append(Constants.UNDERLINE)
-                .append(taskInstance.getId()).append(Constants.UNDERLINE);
+        .append(taskInstance.getProcessInstanceId()).append(Constants.UNDERLINE)
+        .append(taskInstance.getTaskInstancePriority().ordinal()).append(Constants.UNDERLINE)
+        .append(taskInstance.getId()).append(Constants.UNDERLINE);
 
         if(taskWorkerGroupId > 0){
             //not to find data from db
@@ -1047,7 +1047,7 @@ public class ProcessService {
             String[] ipArray = ips.split(COMMA);
 
             for (String ip : ipArray) {
-               long ipLong = IpUtils.ipToLong(ip);
+                long ipLong = IpUtils.ipToLong(ip);
                 ipSb.append(ipLong).append(COMMA);
             }
 
@@ -1083,8 +1083,8 @@ public class ProcessService {
                 // the task already exists in task queue
                 // return state
                 state == ExecutionStatus.RUNNING_EXEUTION
-                        || state == ExecutionStatus.KILL
-                        || checkTaskExistsInTaskQueue(taskInstance)
+                || state == ExecutionStatus.KILL
+                || checkTaskExistsInTaskQueue(taskInstance)
                 ){
             return state;
         }
@@ -1266,7 +1266,7 @@ public class ProcessService {
      * @return task instance list
      */
     public List<TaskInstance> findValidTaskListByProcessId(Integer processInstanceId){
-         return taskInstanceMapper.findValidTaskListByProcessId(processInstanceId, Flag.YES);
+        return taskInstanceMapper.findValidTaskListByProcessId(processInstanceId, Flag.YES);
     }
 
     /**
@@ -1363,9 +1363,9 @@ public class ProcessService {
      * @param taskInstId taskInstId
      */
     public void changeTaskState(ExecutionStatus state, Date startTime, String host,
-                                String executePath,
-                                String logPath,
-                                int taskInstId) {
+            String executePath,
+            String logPath,
+            int taskInstId) {
         TaskInstance taskInstance = taskInstanceMapper.selectById(taskInstId);
         taskInstance.setState(state);
         taskInstance.setStartTime(startTime);
@@ -1396,8 +1396,8 @@ public class ProcessService {
      * @return update process instance result
      */
     public int updateProcessInstance(Integer processInstanceId, String processJson,
-                                     String globalParams, Date scheduleTime, Flag flag,
-                                     String locations, String connects){
+            String globalParams, Date scheduleTime, Flag flag,
+            String locations, String connects){
         ProcessInstance processInstance = processInstanceMapper.queryDetailById(processInstanceId);
         if(processInstance!= null){
             processInstance.setProcessInstanceJson(processJson);
@@ -1417,8 +1417,8 @@ public class ProcessService {
      * @param taskInstId taskInstId
      */
     public void changeTaskState(ExecutionStatus state,
-                                Date endTime,
-                                int taskInstId) {
+            Date endTime,
+            int taskInstId) {
         TaskInstance taskInstance = taskInstanceMapper.selectById(taskInstId);
         taskInstance.setState(state);
         taskInstance.setEndTime(endTime);
@@ -1463,19 +1463,19 @@ public class ProcessService {
     public Schedule querySchedule(int id) {
         return scheduleMapper.selectById(id);
     }
-    
+
     /**
      * query schedule by id
      * if too many records returned, select the latest order by update_time desc
      * @param groupId trigger group id
-     * @return schedule 
+     * @return schedule
      */
-    public Schedule findSchedule(int groupId) {
-      List<Schedule> schedules = scheduleMapper.queryEventTriggerSchedule(TriggerType.EVENT_TRIGGER, groupId);
-      if(schedules != null && schedules.size() > 0){
-        return schedules.get(0);
-      }
-      return null;
+    public Schedule findSchedule(int processDefinitionId) {
+        List<Schedule> schedules = scheduleMapper.queryEventTriggerSchedule(TriggerType.EVENT_TRIGGER, processDefinitionId);
+        if(schedules != null && schedules.size() > 0){
+            return schedules.get(0);
+        }
+        return null;
     }
 
     /**
@@ -1643,23 +1643,23 @@ public class ProcessService {
             }
             Calendar calendar = Calendar.getInstance();
             switch (cycleEnum){
-                /*case MINUTE:
+            /*case MINUTE:
                     calendar.add(Calendar.MINUTE,-61);*/
-                case HOUR:
-                    calendar.add(Calendar.HOUR,-25);
-                    break;
-                case DAY:
-                    calendar.add(Calendar.DATE,-32);
-                    break;
-                case WEEK:
-                    calendar.add(Calendar.DATE,-32);
-                    break;
-                case MONTH:
-                    calendar.add(Calendar.MONTH,-13);
-                    break;
-                default:
-                    logger.warn("Dependent process definition's  cycleEnum is {},not support!!", cycleEnum.name());
-                    continue;
+            case HOUR:
+                calendar.add(Calendar.HOUR,-25);
+                break;
+            case DAY:
+                calendar.add(Calendar.DATE,-32);
+                break;
+            case WEEK:
+                calendar.add(Calendar.DATE,-32);
+                break;
+            case MONTH:
+                calendar.add(Calendar.MONTH,-13);
+                break;
+            default:
+                logger.warn("Dependent process definition's  cycleEnum is {},not support!!", cycleEnum.name());
+                continue;
             }
             Date start = calendar.getTime();
 
@@ -1811,18 +1811,18 @@ public class ProcessService {
             Set<T> originResSet = new HashSet<T>(Arrays.asList(needChecks));
 
             switch (authorizationType){
-                case RESOURCE_FILE:
-                    Set<String> authorizedResources = resourceMapper.listAuthorizedResource(userId, needChecks).stream().map(t -> t.getAlias()).collect(toSet());
-                    originResSet.removeAll(authorizedResources);
-                    break;
-                case DATASOURCE:
-                    Set<Integer> authorizedDatasources = dataSourceMapper.listAuthorizedDataSource(userId,needChecks).stream().map(t -> t.getId()).collect(toSet());
-                    originResSet.removeAll(authorizedDatasources);
-                    break;
-                case UDF:
-                    Set<Integer> authorizedUdfs = udfFuncMapper.listAuthorizedUdfFunc(userId, needChecks).stream().map(t -> t.getId()).collect(toSet());
-                    originResSet.removeAll(authorizedUdfs);
-                    break;
+            case RESOURCE_FILE:
+                Set<String> authorizedResources = resourceMapper.listAuthorizedResource(userId, needChecks).stream().map(t -> t.getAlias()).collect(toSet());
+                originResSet.removeAll(authorizedResources);
+                break;
+            case DATASOURCE:
+                Set<Integer> authorizedDatasources = dataSourceMapper.listAuthorizedDataSource(userId,needChecks).stream().map(t -> t.getId()).collect(toSet());
+                originResSet.removeAll(authorizedDatasources);
+                break;
+            case UDF:
+                Set<Integer> authorizedUdfs = udfFuncMapper.listAuthorizedUdfFunc(userId, needChecks).stream().map(t -> t.getId()).collect(toSet());
+                originResSet.removeAll(authorizedUdfs);
+                break;
             }
 
             resultList.addAll(originResSet);
@@ -1848,136 +1848,158 @@ public class ProcessService {
      * [3] taskInfo
      */
     public void submitTaskTriggerEvent(TaskInstance taskInst){
-      if(taskInst == null  //get task name
-        || taskInst.getProcessDefine() == null  //get project info
-        || taskInst.getProcessInstance() == null){  //get schedule info
-        logger.error("submit task of[{}] trigger event failed with miss key infomartion", taskInst.getName());
-        return;
-      }
-      ProcessDefinition processDefine = taskInst.getProcessDefine();
-      List<TriggerEvent> triggeredEvents = genTriggeredEvents(processDefine.getProjectName()
-                                                             ,processDefine.getName()
-                                                             ,taskInst.getName());
-      Date scheduleTime = taskInst.getProcessInstance().getScheduleTime();
-      if(triggeredEvents == null || triggeredEvents.size() == 0){
-        logger.info("No trigger events after task[{}_{}_{}_{}] done",processDefine.getProjectName()
-                   ,processDefine.getName(),taskInst.getName(),DateUtils.dateToString(scheduleTime));
-        return;
-      }
-      for(int i=0;i<triggeredEvents.size();i++){
-        TriggerEvent element = triggeredEvents.get(i);
-        element.setScheduleTime(scheduleTime);
-        element.setTriggerTime(getTriggeredTime(scheduleTime, element.getTriTimeType()));
-      }
-      saveOrUpdateTriggerEvent(triggeredEvents);
+        if(taskInst == null  //get task name
+                || taskInst.getProcessDefine() == null  //get project info
+                || taskInst.getProcessInstance() == null){  //get schedule info
+            logger.error("submit task of[{}] trigger event failed with miss key infomartion", taskInst.getName());
+            return;
+        }
+        ProcessDefinition processDefine = taskInst.getProcessDefine();
+        String projectName = processDefine.getProjectName();
+        if (StringUtils.isBlank(projectName)) {  // maybe always null
+            Project project = projectMapper.selectById(processDefine.getProjectId());
+            if(project != null){
+                projectName = project.getName();
+            }
+        }
+        List<TriggerEvent> triggeredEvents = genTriggeredEvents(projectName
+                ,processDefine.getName()
+                ,taskInst.getName());
+        Date scheduleTime = taskInst.getProcessInstance().getScheduleTime();
+        if(triggeredEvents == null || triggeredEvents.size() == 0){
+            logger.info("No trigger events after task[{}_{}_{}_{}] done",projectName
+                    ,processDefine.getName(),taskInst.getName(),DateUtils.dateToString(scheduleTime));
+            return;
+        }
+        for(int i=0;i<triggeredEvents.size();i++){
+            TriggerEvent element = triggeredEvents.get(i);
+            element.setScheduleTime(scheduleTime);
+            element.setTriggerTime(getTriggeredTime(scheduleTime, element.getTriTimeType()));
+        }
+        saveOrUpdateTriggerEvent(triggeredEvents);
     }
 
-    
+
     /**
      * @param procInst with following args
      * [1] projectInfo = projectId
      * [2] processInfo
      */
     public void submitProcessTriggerEvent(ProcessInstance procInst){
-      if(procInst == null  //get task name
-          || procInst.getProcessDefinition() == null){  //get project info
-          logger.error("submit process of[{}] trigger event failed with miss key infomartion", procInst.getName());
-          return;
+        if(procInst == null  //get task name
+                || procInst.getProcessDefinition() == null){  //get project info
+            logger.error("submit process of[{}] trigger event failed with miss key infomartion", procInst.getName());
+            return;
         }
         ProcessDefinition processDefine = procInst.getProcessDefinition();
-        List<TriggerEvent> triggeredEvents = genTriggeredEvents(processDefine.getProjectName()
-                                                               ,processDefine.getName()
-                                                               ,null);
+        String projectName = processDefine.getProjectName();
+        if (StringUtils.isBlank(projectName)) {  // maybe always null
+            Project project = projectMapper.selectById(processDefine.getProjectId());
+            if(project != null){
+                projectName = project.getName();
+            }
+        }
+        List<TriggerEvent> triggeredEvents = genTriggeredEvents(projectName
+                ,processDefine.getName()
+                ,null);
         if(triggeredEvents == null || triggeredEvents.size() == 0){
-          logger.info("No trigger events after process[{}_{}_{}] done",processDefine.getProjectName()
-                     ,processDefine.getName(),DateUtils.dateToString(procInst.getScheduleTime()));
-          return;
+            logger.info("No trigger events after process[{}_{}_{}] done",projectName
+                    ,processDefine.getName(),DateUtils.dateToString(procInst.getScheduleTime()));
+            return;
         }
         Date scheduleTime = procInst.getScheduleTime();
         for(int i=0;i<triggeredEvents.size();i++){
-          TriggerEvent element = triggeredEvents.get(i);
-          element.setScheduleTime(scheduleTime);
-          element.setTriggerTime(getTriggeredTime(scheduleTime, element.getTriTimeType()));
+            TriggerEvent element = triggeredEvents.get(i);
+            element.setScheduleTime(scheduleTime);
+            element.setTriggerTime(getTriggeredTime(scheduleTime, element.getTriTimeType()));
         }
         saveOrUpdateTriggerEvent(triggeredEvents);
     }
 
     private Date getTriggeredTime(Date scheduleTime,String triTimeType){
-      if(scheduleTime == null || triTimeType == null){
-        return null;
-      }
-      DateFormat dateFmt = new SimpleDateFormat("yyyyMMdd");
-      switch (triTimeType.toUpperCase().trim()) {
-      case "DD"://day
-        //use default;
-        break;
-      case "MM"://month
-        dateFmt = new SimpleDateFormat("yyyyMM");
-        break;
-      case "HH"://hour
-        dateFmt = new SimpleDateFormat("yyyyMMddHH");
-        break;
-      case "YY"://month
-        dateFmt = new SimpleDateFormat("yyyy");
-        break;
-      case "MI"://minute
-        dateFmt = new SimpleDateFormat("yyyyMMddHHmm");
-      case "SS"://second
-        return scheduleTime;
-      default:
-        logger.warn("No supported trigger time type[{}]",triTimeType);
-        return null;
-      }
-      try {
-        return dateFmt.parse(dateFmt.format(scheduleTime));
-      } catch (ParseException e) {
-        logger.error("Trans trigger time from schedule time[{}] with format[{}] failed",scheduleTime,triTimeType,e);
-        return null;
-      }
+        if(scheduleTime == null || triTimeType == null){
+            return null;
+        }
+        DateFormat dateFmt = new SimpleDateFormat("yyyyMMdd");
+        switch (triTimeType.toUpperCase().trim()) {
+        case "DD"://day
+            //use default;
+            break;
+        case "MM"://month
+            dateFmt = new SimpleDateFormat("yyyyMM");
+            break;
+        case "HH"://hour
+            dateFmt = new SimpleDateFormat("yyyyMMddHH");
+            break;
+        case "YY"://month
+            dateFmt = new SimpleDateFormat("yyyy");
+            break;
+        case "MI"://minute
+            dateFmt = new SimpleDateFormat("yyyyMMddHHmm");
+        case "SS"://second
+            return scheduleTime;
+        default:
+            logger.warn("No supported trigger time type[{}]",triTimeType);
+            return null;
+        }
+        try {
+            return dateFmt.parse(dateFmt.format(scheduleTime));
+        } catch (ParseException e) {
+            logger.error("Trans trigger time from schedule time[{}] with format[{}] failed",scheduleTime,triTimeType,e);
+            return null;
+        }
     }
 
     /**
      * generate triggered processes by task
-     * @param projectInfo get project name
-     * @param processInfo get process name
-     * @param taskInfo get task name
+     * @param projectName process project name
+     * @param processName process definition name
+     * @param taskName process sub task name
      * @see TriggerEvent
      * @return List of TriggerEvent
      */
-    public List<TriggerEvent> genTriggeredEvents(String projectInfo,String processInfo,String taskInfo){
-      EventTriggerType eventType = null;
-      if(StringUtils.isBlank(taskInfo)){
-        eventType = EventTriggerType.EVENT_TRIGGER_PROCESS;
-      }else{
-        eventType = EventTriggerType.EVENT_TRIGGER_TASK;
-      }
-      return triggerEventMapper.queryTriggeredGroups(projectInfo,processInfo,taskInfo,eventType.getCode());
+    public List<TriggerEvent> genTriggeredEvents(String projectName,String processName,String taskName){
+        if(StringUtils.isBlank(projectName)){
+            logger.warn("Query event trigger group failed : Project name is missing");
+            return null;
+        }
+        if(StringUtils.isBlank(projectName)){
+            logger.warn("Query event trigger group failed : Process name is missing");
+            return null;
+        }
+        EventTriggerType eventType = null;
+        if(StringUtils.isBlank(processName)){
+            eventType = EventTriggerType.EVENT_TRIGGER_PROCESS;
+        }else{
+            eventType = EventTriggerType.EVENT_TRIGGER_TASK;
+        }
+        return triggerEventMapper.queryTriggeredGroups(projectName,processName,taskName,eventType.getCode());
     }
-    
+
     /**
      * @param triggerEvents
      * @return effect rows number
      */
     public int saveOrUpdateTriggerEvent(List<TriggerEvent> triggerEvents){
-      if(triggerEvents == null){
-        return 0;
-      }
-      int insertRows = 0;
-      int updateRows = 0;
-      for(int i=0;i<triggerEvents.size();i++){
-        if(triggerEventMapper.saveIfNotExist(triggerEvents.get(i)) > 0){
-          insertRows += 1;
-        }else{
-          updateRows += triggerEventMapper.updateIfExist(triggerEvents.get(i));
+        if(triggerEvents == null){
+            return 0;
         }
-        //effectRows += triggerEventMapper.saveOrUpdate(triggerEvents.get(i));
-      }
-      logger.info("Total[{}] and insert [{}] and update[{}] trigger events",triggerEvents.size(),insertRows,updateRows);
-      return insertRows + updateRows;
+        int insertRows = 0;
+        int updateRows = 0;
+        for(int i=0;i<triggerEvents.size();i++){
+            if(triggerEventMapper.saveIfNotExist(triggerEvents.get(i)) > 0){
+                insertRows += 1;
+            }else{
+                updateRows += triggerEventMapper.updateIfExist(triggerEvents.get(i));
+            }
+            //effectRows += triggerEventMapper.saveOrUpdate(triggerEvents.get(i));
+        }
+        logger.info("Total[{}] and insert [{}] and update[{}] trigger events",triggerEvents.size(),insertRows,updateRows);
+        return insertRows + updateRows;
     }
 
     public List<TriggerGroup> pollTriggeredGroup(){
-      return triggerEventMapper.pollTriggeredGroup(Constants.COMMA);
+        return triggerEventMapper.pollTriggeredGroup(Constants.COMMA);
     }
 
     /**
@@ -1986,11 +2008,11 @@ public class ProcessService {
      * @return true : success;false : failed
      */
     public boolean disableTriggerEvents(int[] eventIds,String reason){
-      if(eventIds == null || eventIds.length < 1){
-        return true;
-      }else{
-        return triggerEventMapper.updateTriggerEventsStatus(eventIds,0,reason) > 0;
-      }
+        if(eventIds == null || eventIds.length < 1){
+            return true;
+        }else{
+            return triggerEventMapper.updateTriggerEventsStatus(eventIds,0,reason) > 0;
+        }
     }
 
     /**
@@ -1999,13 +2021,13 @@ public class ProcessService {
      * @return true : success;false : failed
      */
     public boolean safeDeleteTriggerEvents(int[] eventIds){
-      if(eventIds == null || eventIds.length < 1){
-        return true;
-      }else{
-        int backupRows = triggerEventMapper.backupTriggerEvents(eventIds);
-        int removeRows = triggerEventMapper.deleteTriggerEvents(eventIds);
-        return backupRows > 0 && backupRows == removeRows;
-      }
+        if(eventIds == null || eventIds.length < 1){
+            return true;
+        }else{
+            int backupRows = triggerEventMapper.backupTriggerEvents(eventIds);
+            int removeRows = triggerEventMapper.deleteTriggerEvents(eventIds);
+            return backupRows > 0 && backupRows == removeRows;
+        }
     }
 
     /**
@@ -2014,11 +2036,12 @@ public class ProcessService {
      * @return true : success;false : failed
      */
     public boolean deleteTriggerEvents(int[] eventIds){
-      if(eventIds == null || eventIds.length < 1){
-        return true;
-      }else{
-        return triggerEventMapper.deleteTriggerEvents(eventIds) > 0;
-      }
+        if(eventIds == null || eventIds.length < 1){
+            return true;
+        }else{
+            return triggerEventMapper.deleteTriggerEvents(eventIds) > 0;
+        }
     }
 
 }
+

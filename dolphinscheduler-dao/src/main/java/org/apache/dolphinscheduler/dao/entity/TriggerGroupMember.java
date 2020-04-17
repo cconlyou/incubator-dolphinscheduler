@@ -46,6 +46,10 @@ public class TriggerGroupMember {
      */
     private String groupName;
     /**
+     * order in group
+     */
+    private int orderInGroup = 1;
+    /**
      * group description
      * only for query
      */
@@ -70,12 +74,12 @@ public class TriggerGroupMember {
     /**
      * task id
      */
-    private int taskId;
+    private String taskId;
     /**
      * task name
      */
     private String taskName;
-    
+
     /**
      * trigger event type / member type
      */
@@ -102,7 +106,7 @@ public class TriggerGroupMember {
      */
     @TableField(exist = false)
     private String updateTime;
-    
+
     /**
      * remark
      */
@@ -172,11 +176,11 @@ public class TriggerGroupMember {
       this.processDefName = processDefName;
     }
 
-    public int getTaskId() {
+    public String getTaskId() {
       return taskId;
     }
 
-    public void setTaskId(int taskId) {
+    public void setTaskId(String taskId) {
       this.taskId = taskId;
     }
 
@@ -241,6 +245,14 @@ public class TriggerGroupMember {
     @Override
     public int hashCode() {
         return Objects.hash(memberId);
+    }
+
+    public int getOrderInGroup() {
+        return orderInGroup;
+    }
+
+    public void setOrderInGroup(int orderInGroup) {
+        this.orderInGroup = orderInGroup;
     }
 
 }

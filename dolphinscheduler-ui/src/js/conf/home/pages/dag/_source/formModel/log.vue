@@ -40,6 +40,9 @@
               <a href="javascript:" @click="_screenClose" v-show="isScreen" data-container="body" data-toggle="tooltip" :title="$t('Cancel full screen')">
                 <em class="ans-icon-min"></em>
               </a>
+              <a href="javascript:" @click="close" data-container="body" data-toggle="tooltip" :title="$t('Close')">
+                <em class="ans-icon-close"></em>
+              </a>
             </div>
           </div>
           <div class="content">

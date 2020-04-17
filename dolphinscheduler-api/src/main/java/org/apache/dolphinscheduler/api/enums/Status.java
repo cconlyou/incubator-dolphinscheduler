@@ -26,6 +26,7 @@ import java.util.Locale;
 public enum Status {
 
     SUCCESS(0, "success", "成功"),
+    FAILED(1, "Operate failed,Please contact administator", "操作失败，请联系管理员"),
 
     REQUEST_PARAMS_NOT_VALID_ERROR(10001, "request parameter {0} is not valid", "请求参数[{0}]无效"),
     TASK_TIMEOUT_PARAMS_ERROR(10002, "task timeout parameter is not valid", "任务超时参数无效"),
@@ -175,6 +176,16 @@ public enum Status {
     QUERY_WORKER_GROUP_FAIL(100146,"query worker group fail ", "查询worker分组失败"),
     DELETE_WORKER_GROUP_FAIL(100147,"delete worker group fail ", "删除worker分组失败"),
 
+    LIST_EVENT_TRIGGER_GROUP(109001,"query group of event trigger failed", "查询事件触发器组失败"),
+    LIST_EVENT_TRIGGER_GROUP_MEMBER(109002,"query group member of event trigger failed", "查询事件触发器组成员失败"),
+    PAGE_LIST_EVENT_TRIGGER_GROUP(109003,"page list group of event trigger failed", "分页查询事件触发器组失败"),
+    PAGE_LIST_EVENT_TRIGGER_GROUP_MEMBER(109004,"page list group member of event trigger failed", "分页查询事件触发器组成员失败"),
+    CREATE_EVENT_TRIGGER_GROUP_ERROR(109005,"create event trigger group error", "创建事件触发组错误"),
+    UPDATE_EVENT_TRIGGER_GROUP_ERROR(109006,"update event trigger group error", "更新事件触发组错误"),
+    DELETE_EVENT_TRIGGER_GROUP_ERROR(109007,"delete event trigger group error", "删除事件触发组错误"),
+    CREATE_EVENT_TRIGGER_GROUP_MEMBER_ERROR(109008,"create event trigger group member error", "创建事件触发组成员错误"),
+    UPDATE_EVENT_TRIGGER_GROUP_MEMBER_ERROR(109009,"update event trigger group member error", "更新事件触发组成员错误"),
+    DELETE_EVENT_TRIGGER_GROUP_MEMBER_ERROR(109010,"delete event trigger group member error", "删除事件触发组成员错误"),
 
     UDF_FUNCTION_NOT_EXIST(20001, "UDF function not found", "UDF函数不存在"),
     UDF_FUNCTION_EXISTS(20002, "UDF function already exists", "UDF函数已存在"),

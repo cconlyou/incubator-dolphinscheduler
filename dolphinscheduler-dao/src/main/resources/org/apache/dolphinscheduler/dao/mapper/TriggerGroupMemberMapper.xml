@@ -19,4 +19,104 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="org.apache.dolphinscheduler.dao.mapper.TriggerGroupMemberMapper">
 
+    <select id="countMembers" resultType="java.lang.Integer">
+        select count(1)
+          from td_etl_trigger_group_member a
+    inner join td_etl_trigger_group        b on a.group_id = b.group_id
+	    <where>
+            <if test=" projectName != null and projectName != ''">
+               and b.tri_project_name = #{projectName}
+            </if>
+	        <if test=" groupName != null and groupName != ''">
+	           and b.group_name = #{groupName}
+	        </if>
+	        <if test=" enableFlag != null ">
+	           and a.enable_flag = #{enableFlag}
+	        </if>
+	    </where>
+    </select>
+    
+    <delete id="deleteMembers">
+    delete from td_etl_trigger_group_member
+        <where>
+            group_id in (select group_id
+                           from td_etl_trigger_group
+                          where group_name = #{groupName}
+			            <if test=" projectName != null and projectName != ''">
+			               and tri_project_name = #{projectName}
+			            </if>
+                          )
+            <if test=" enableFlag != null ">
+               and a.enable_flag = #{enableFlag}
+            </if>
+        </where>
+    </delete>
+
+    <select id="queryByGroup" resultType="org.apache.dolphinscheduler.dao.entity.TriggerGroupMember">
+        select a.*
+          from td_etl_trigger_group_member a
+    inner join td_etl_trigger_group        b on a.group_id = b.group_id
+    <if test=" userId != null ">
+     left join t_ds_relation_project_user  c on b.tri_project_id = c.project_id and c.user_id = #{userId}
+    </if>
+      <where>
+        <if test=" triProjectName != null and triProjectName != ''">
+           and b.tri_project_name = #{triProjectName}
+        </if>
+        <if test=" groupName != null and groupName != ''">
+           and b.group_name = #{groupName}
+        </if>
+        <if test=" enableFlag != null ">
+           and b.enable_flag = #{enableFlag}
+        </if>
+      </where>
+      order by a.group_id desc, a.order_in_group asc
+    </select>
+
+    <select id="queryByMember" resultType="org.apache.dolphinscheduler.dao.entity.TriggerGroupMember">
+        select a.*
+          from td_etl_trigger_group_member a
+    inner join td_etl_trigger_group        b on a.group_id = b.group_id
+    <if test=" userId != null ">
+     left join t_ds_relation_project_user  c on b.tri_project_id = c.project_id and c.user_id = #{userId}
+    </if>
+      <where>
+        <if test=" projectName != null and projectName != ''">
+           and a.project_name = #{projectName}
+        </if>
+        <if test=" processDefName != null and processDefName != ''">
+           and a.process_def_name = #{processDefName}
+        </if>
+        <if test=" groupName != null and groupName != ''">
+           and b.group_name = #{groupName}
+        </if>
+        <if test=" enableFlag != null ">
+           and a.enable_flag = #{enableFlag}
+        </if>
+      </where>
+      order by a.group_id desc, a.order_in_group asc
+    </select>
+
+    <select id="queryListPaging" resultType="org.apache.dolphinscheduler.dao.entity.TriggerGroupMember">
+        select a.*
+          from td_etl_trigger_group_member a
+    inner join td_etl_trigger_group        b on a.group_id = b.group_id
+     left join t_ds_relation_project_user  c on b.tri_project_id = c.project_id and c.user_id = #{userId}
+         where b.tri_project_id = #{projectId}
+        <if test=" groupName != null and groupName != ''">
+           and b.group_name = #{groupName}
+        </if>
+        <if test=" searchVal != null and searchVal != ''">
+           and (b.group_name like concat('%', #{searchVal}, '%')
+            or  b.tri_process_def_name like concat('%', #{searchVal}, '%')
+            or  a.process_def_name like concat('%', #{searchVal}, '%')
+            or  a.task_name like concat('%', #{searchVal}, '%'))
+        </if>
+        <if test=" enableFlag != null ">
+           and a.enable_flag = #{enableFlag}
+           and b.enable_flag = #{enableFlag}
+        </if>
+      order by a.group_id desc, a.order_in_group asc
+    </select>
+
 </mapper>

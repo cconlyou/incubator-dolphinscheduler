@@ -74,5 +74,5 @@ public interface ScheduleMapper extends BaseMapper<Schedule> {
      * @param groupId
      * @return
      */
-    List<Schedule> queryEventTriggerSchedule(@Param("triggerType") TriggerType triggerType,@Param("groupId") int groupId);
+    List<Schedule> queryEventTriggerSchedule(@Param("triggerType") TriggerType triggerType,@Param("processDefinitionId") int processDefinitionId);
 }

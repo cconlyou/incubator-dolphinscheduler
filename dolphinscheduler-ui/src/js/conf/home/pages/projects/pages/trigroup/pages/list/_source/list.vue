@@ -22,28 +22,34 @@
           <th scope="col">
             <span>{{$t('#')}}</span>
           </th>
+          <th scope="col" width="60">
+            <span>Group ID</span>
+          </th>
+          <th scope="col" width="240">
+            <span>{{$t('Group Name')}}</span>
+          </th>
           <th scope="col">
             <span>{{$t('Project Name')}}</span>
           </th>
-          <th scope="col">
-            <span>{{$t('Owned Users')}}</span>
+          <!-- <th scope="col">
+            <span>TriProcessID</span>
+          </th> -->
+          <th scope="col" width="200">
+            <span>{{$t('Process Name')}}</span>
           </th>
           <th scope="col">
-            <span>{{$t('Process Define Count')}}</span>
+            <span>{{$t('Trigger Time Type')}}</span>
           </th>
           <th scope="col">
-            <span>{{$t('Process Instance Running Count')}}</span>
+            <span>{{$t('Group Description')}}</span>
           </th>
-          <th scope="col">
-            <span>{{$t('Description')}}</span>
+          <th scope="col" width="60">
+            <span>{{$t('Enable Flag')}}</span>
           </th>
-          <th scope="col">
-            <span>{{$t('Create Time')}}</span>
-          </th>
-          <th scope="col">
+          <th scope="col" width="70">
             <span>{{$t('Update Time')}}</span>
           </th>
-          <th scope="col" width="80">
+          <th scope="col" width="160">
             <span>{{$t('Operation')}}</span>
           </th>
         </tr>
@@ -52,26 +58,28 @@
             <span>{{parseInt(pageNo === 1 ? ($index + 1) : (($index + 1) + (pageSize * (pageNo - 1))))}}</span>
           </td>
           <td>
-            <span>
-              <a href="javascript:" @click="_switchProjects(item)" class="links">{{item.name}}</a>
-            </span>
+            <span>{{item.groupId}}</span>
           </td>
           <td>
-            <span>{{item.userName || '-'}}</span>
+            <span>{{item.groupName || '-'}}</span>
           </td>
           <td>
-            <span>{{item.defCount}}</span>
+            <span>{{item.triProjectName}}</span>
+          </td>
+          <!-- <td>
+            <span>{{item.triProcessDefId}}</span>
+          </td> -->
+          <td>
+            <span>{{item.triProcessDefName}}</span>
           </td>
           <td>
-            <span>{{item.instRunningCount}}</span>
+            <span>{{item.triTimeType}}</span>
           </td>
           <td>
-            <span v-if="item.description" class="ellipsis" v-tooltip.large.top.start.light="{text: item.description, maxWidth: '500px'}">{{item.description}}</span>
-            <span v-else>-</span>
+            <span>{{item.groupDesc}}</span>
           </td>
           <td>
-            <span v-if="item.createTime">{{item.createTime | formatDate}}</span>
-            <span v-else>-</span>
+            <span>{{_rtReleaseEnableFlag(item.enableFlag)}}</span>
           </td>
           <td>
             <span v-if="item.updateTime">{{item.updateTime | formatDate}}</span>
@@ -84,15 +92,45 @@
                     size="xsmall"
                     data-toggle="tooltip"
                     :title="$t('Edit')"
-                    @click="_edit(item)"
+                    @click="_edit(item,'Group')"
                     icon="ans-icon-edit">
             </x-button>
+            <x-button
+                    type="info"
+                    shape="circle"
+                    size="xsmall"
+                    data-toggle="tooltip"
+                    :title="$t('Group Members Manage')"
+                    @click="_edit(item,'Member')"
+                    icon="ans-icon-group">
+            </x-button>
+            <x-poptip
+                    :ref="'jumpto-' + $index"
+                    placement="bottom-end"
+                    width="90">
+              <p>{{$t('It will jump to another page')}}</p>
+              <div style="text-align: center; margin: 0;padding-top: 4px;">
+                <x-button type="text" size="xsmall" shape="circle" @click="_closeJumpTo($index)">{{$t('Cancel')}}</x-button>
+                <x-button type="primary" size="xsmall" shape="circle" @click="_jumpTo(item,$index)">{{$t('Confirm')}}</x-button>
+              </div>
+              <template slot="reference">
+                <x-button
+                        type="info"
+                        shape="circle"
+                        size="xsmall"
+                        data-toggle="tooltip"
+                        :title="$t('Trigger Manage')"
+                        icon="ans-icon-datetime">
+                </x-button>
+              </template>
+            </x-poptip>
+            <!-- delete button -->
             <x-poptip
                     :ref="'poptip-' + $index"
                     placement="bottom-end"
                     width="90">
               <p>{{$t('Delete?')}}</p>
-              <div style="text-align: right; margin: 0;padding-top: 4px;">
+              <div style="text-align: center; margin: 0;padding-top: 4px;">
                 <x-button type="text" size="xsmall" shape="circle" @click="_closeDelete($index)">{{$t('Cancel')}}</x-button>
                 <x-button type="primary" size="xsmall" shape="circle" @click="_delete(item,$index)">{{$t('Confirm')}}</x-button>
               </div>
@@ -114,46 +152,65 @@
   </div>
 </template>
 <script>
-  import { mapActions, mapMutations } from 'vuex'
+  import _ from 'lodash'
+  import { mapActions } from 'vuex'
   import localStore from '@/module/util/localStorage'
   import { findComponentDownward } from '@/module/util/'
+  import { enableFlagEnum } from '@/conf/home/pages/dag/_source/config'
 
   export default {
-    name: 'projects-list',
+    name: 'list',
     data () {
       return {
         list: []
       }
     },
     props: {
-      projectsList: Array,
+      triGroupsList: Array,
       pageNo: Number,
       pageSize: Number
     },
     methods: {
-      ...mapActions('projects', ['deleteProjects']),
-      ...mapMutations('dag', ['setProjectName']),
-      ...mapMutations('triggers', ['setTriProjectId']),
-      ...mapMutations('triggers', ['setTriProjectName']),
-      _switchProjects (item) {
-        this.setProjectName(item.name)
-        this.setTriProjectId(item.id)
-        this.setTriProjectName(item.name)
-        localStore.setItem('projectName', `${item.name}`)
-        localStore.setItem('projectId', `${item.id}`)
-        this.$router.push({ path: `/projects/index` })
+      ...mapActions('triggers', ['deleteGroups']),
+      /**
+       * return event trigger type
+       */
+      _rtReleaseEnableFlag (code) {
+        return _.filter(enableFlagEnum, v => v.id === code)[0].desc
       },
+      /**
+       * edit project
+       * @param item Current record
+       */
+      _edit (item,flag) {
+        findComponentDownward(this.$root, 'event-trigger-group-list-index')._create(item,flag)
+      },
+      /**
+       * cancel jump operation
+       */
+      _closeJumpTo(i) {
+        this.$refs[`jumpto-${i}`][0].doClose()
+      },
+      _jumpTo(item, i) {
+        this.$refs[`jumpto-${i}`][0].doClose()
+        //this.$message.warning('Feature not yet open, please wait')
+        this.$router.push({ path: `/projects/definition/list/timing/${item.triProcessDefId}`})
+      },
+      /**
+       * cancel delete
+       */
       _closeDelete (i) {
         this.$refs[`poptip-${i}`][0].doClose()
       },
       /**
-       * Delete Project
+       * Delete event trigger group
        * @param item Current record
        * @param i index
        */
       _delete (item, i) {
-        this.deleteProjects({
-          projectId: item.id
+        this.deleteGroups({
+          projectName: item.triProjectName,
+          groupId: item.groupId
         }).then(res => {
           this.$refs[`poptip-${i}`][0].doClose()
           this.$emit('on-update')
@@ -162,18 +219,10 @@
           this.$refs[`poptip-${i}`][0].doClose()
           this.$message.error(e.msg || '')
         })
-      },
-      /**
-       * edit project
-       * @param item Current record
-       */
-      _edit (item) {
-        findComponentDownward(this.$root, 'projects-list')._create(item)
-      },
-
+      }
     },
     watch: {
-      projectsList (a) {
+      triGroupsList (a) {
         this.list = []
         setTimeout(() => {
           this.list = a
@@ -183,7 +232,7 @@
     created () {
     },
     mounted () {
-      this.list = this.projectsList
+      this.list = this.triGroupsList
     },
     components: { }
   }

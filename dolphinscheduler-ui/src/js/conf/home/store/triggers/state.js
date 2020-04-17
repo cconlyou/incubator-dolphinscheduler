@@ -14,26 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Vue from 'vue'
-import Vuex from 'vuex'
-import dag from './dag'
-import projects from './projects'
-import resource from './resource'
-import security from './security'
-import datasource from './datasource'
-import user from './user'
-import monitor from './monitor'
-import triggers from './triggers'
-Vue.use(Vuex)
-export default new Vuex.Store({
-  modules: {
-    dag,
-    projects,
-    resource,
-    security,
-    datasource,
-    user,
-    monitor,
-    triggers
-  }
-})
+
+import localStore from '@/module/util/localStorage'
+
+// Get the name of the item currently clicked
+let projectId = localStore.getItem('projectId')
+let projectName = localStore.getItem('projectName')
+
+export default {
+    projectId: projectId || -1,
+    projectName: projectName || 'UNDEFINED'
+}

@@ -69,6 +69,28 @@ let menu = {
           disabled: config.recordSwitch
         }
       ]
+    },
+    {
+      name: `${i18n.$t('Event trigger')}`,
+      id: 2,
+      path: '',
+      isOpen: true,
+      disabled: true,
+      icon: 'ans-icon-node',
+      children: [
+        {
+          name: `${i18n.$t('Trigger group')}`,
+          path: 'event-trigger-group',
+          id: 0,
+          disabled: true
+        },
+        {
+          name: `${i18n.$t('Trigger GrpMember')}`,
+          path: 'event-trigger-group-member',
+          id: 1,
+          disabled: true
+        }
+      ]
     }
   ],
 

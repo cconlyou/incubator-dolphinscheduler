@@ -25,28 +25,31 @@
           <th scope="col" width="40">
             <span>{{$t('#')}}</span>
           </th>
-          <th scope="col">
+          <th scope="col" width="240">
             <span>{{$t('Process Name')}}</span>
           </th>
           <th scope="col" width="50">
             <span>{{$t('State')}}</span>
           </th>
-          <th scope="col" width="130">
+          <th scope="col" width="70">
             <span>{{$t('Create Time')}}</span>
           </th>
-          <th scope="col" width="130">
+          <th scope="col" width="70">
             <span>{{$t('Update Time')}}</span>
           </th>
           <th scope="col">
             <span>{{$t('Description')}}</span>
           </th>
-          <th scope="col" width="130">
+          <th scope="col" width="90">
             <span>{{$t('Modify User')}}</span>
           </th>
-          <th scope="col" width="90">
-            <span>{{$t('Timing state')}}</span>
+          <th scope="col" width="80">
+            <span>{{$t('Trigger Type')}}</span>
           </th>
-          <th scope="col" width="240">
+          <th scope="col" width="80">
+            <span>{{$t('Trigger State')}}</span>
+          </th>
+          <th scope="col" width="210">
             <span>{{$t('Operation')}}</span>
           </th>
         </tr>
@@ -80,17 +83,21 @@
             <span v-else>-</span>
           </td>
           <td>
+            <span v-if="item.scheduleType">{{_rtTriggerType(item.scheduleType)}}</span>
+            <span v-else>-</span>
+          </td>
+          <td>
             <span v-if="item.scheduleReleaseState === 'OFFLINE'">{{$t('offline')}}</span>
             <span v-if="item.scheduleReleaseState === 'ONLINE'">{{$t('online')}}</span>
             <span v-if="!item.scheduleReleaseState">-</span>
           </td>
           <td>
             <x-button type="info" shape="circle" size="xsmall" data-toggle="tooltip" :title="$t('Edit')" @click="_edit(item)" :disabled="item.releaseState === 'ONLINE'"  icon="ans-icon-edit"><!--{{$t('编辑')}}--></x-button>
-            <x-button type="success" shape="circle" size="xsmall" data-toggle="tooltip" :title="$t('Start')" @click="_start(item)" :disabled="item.releaseState !== 'ONLINE'"  icon="ans-icon-play"><!--{{$t('启动')}}--></x-button>
-            <x-button type="info" shape="circle" size="xsmall" data-toggle="tooltip" :title="$t('Timing')" @click="_timing(item)" :disabled="item.releaseState !== 'ONLINE' || item.scheduleReleaseState !== null"  icon="ans-icon-timer"><!--{{$t('定时')}}--></x-button>
+            <!-- <x-button type="info" shape="circle" size="xsmall" data-toggle="tooltip" :title="$t('Timing')" @click="_timing(item)" :disabled="item.releaseState !== 'ONLINE' || item.scheduleReleaseState !== null"  icon="ans-icon-timer"></x-button> -->
             <x-button type="warning" shape="circle" size="xsmall" data-toggle="tooltip" :title="$t('online')" @click="_poponline(item)" v-if="item.releaseState === 'OFFLINE'"  icon="ans-icon-upward"><!--{{$t('下线')}}--></x-button>
             <x-button type="error" shape="circle" size="xsmall" data-toggle="tooltip" :title="$t('offline')" @click="_downline(item)" v-if="item.releaseState === 'ONLINE'"  icon="ans-icon-downward"><!--{{$t('上线')}}--></x-button>
-            <x-button type="info" shape="circle" size="xsmall" data-toggle="tooltip" :title="$t('Trigger Manage')" @click="_timingManage(item)" :disabled="item.releaseState !== 'ONLINE'"  icon="ans-icon-datetime"><!--{{$t('定时管理')}}--></x-button>
+            <x-button type="success" shape="circle" size="xsmall" data-toggle="tooltip" :title="$t('Manual Start')" @click="_start(item)" :disabled="item.releaseState !== 'ONLINE'"  icon="ans-icon-play"><!--{{$t('启动')}}--></x-button>
+            <x-button type="success" shape="circle" size="xsmall" data-toggle="tooltip" :title="$t('Trigger Manage')" @click="_triggerManage(item)"  icon="ans-icon-datetime"></x-button>
             <x-poptip
               :ref="'poptip-delete-' + $index"
               placement="bottom-end"
@@ -141,7 +148,7 @@
   import mStart from './start'
   import mTiming from './timing'
   import { mapActions } from 'vuex'
-  import { publishStatus } from '@/conf/home/pages/dag/_source/config'
+  import { publishStatus,triggerTypeEnum } from '@/conf/home/pages/dag/_source/config'
 
   export default {
     name: 'definition-list',
@@ -161,6 +168,9 @@
       ...mapActions('dag', ['editProcessState', 'getStartCheck', 'getReceiver', 'deleteDefinition', 'batchDeleteDefinition','exportDefinition']),
       _rtPublishStatus (code) {
         return _.filter(publishStatus, v => v.code === code)[0].desc
+      },
+      _rtTriggerType (code) {
+        return _.filter(triggerTypeEnum, v => v.code === code)[0].desc
       },
       _treeView (item) {
         this.$router.push({ path: `/projects/definition/tree/${item.id}` })
@@ -248,8 +258,8 @@
       /**
        * Timing manage
        */
-      _timingManage (item) {
-        this.$router.push({ path: `/projects/definition/list/timing/${item.id}` })
+      _triggerManage (item) {
+        this.$router.push({ path: `/projects/definition/list/timing/${item.id}`})
       },
       /**
        * Close the delete layer

@@ -22,10 +22,10 @@
           <th scope="col">
             <span>{{$t('#')}}</span>
           </th>
-          <th scope="col">
+          <th scope="col" width="100">
             <span>{{$t('Name')}}</span>
           </th>
-          <th scope="col">
+          <th scope="col" width="200">
             <span>{{$t('Process Instance')}}</span>
           </th>
           <th scope="col" width="70">
@@ -37,13 +37,13 @@
           <th scope="col" width="40">
             <span>{{$t('State')}}</span>
           </th>
-          <th scope="col" width="140">
+          <th scope="col" width="70">
             <span>{{$t('Submit Time')}}</span>
           </th>
-          <th scope="col" width="140">
+          <th scope="col" width="70">
             <span>{{$t('Start Time')}}</span>
           </th>
-          <th scope="col" width="140">
+          <th scope="col" width="70">
             <span>{{$t('End Time')}}</span>
           </th>
           <th scope="col" width="110">

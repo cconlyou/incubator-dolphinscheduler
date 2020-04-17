@@ -77,7 +77,7 @@ export default {
   'Edit Password': 'Edit Password',
   'success': 'success',
   'failed': 'failed',
-  'delete': 'delete',
+  'delete': 'Delete',
   'Please choose': 'Please choose',
   'Please enter a positive integer': 'Please enter a positive integer',
   'Program Type': 'Program Type',
@@ -124,7 +124,7 @@ export default {
   'Mail subject required': 'Mail subject required',
   'Child Node': 'Child Node',
   'Please select a sub-Process': 'Please select a sub-Process',
-  'Edit': 'Edit',
+  'Edit': 'Edit ',
   'Datasource Name': 'Datasource Name',
   'Please enter datasource name': 'Please enter datasource name',
   'IP': 'IP',
@@ -185,6 +185,7 @@ export default {
   'Edit alarm group': 'Edit alarm group',
   'Create alarm group': 'Create alarm group',
   'Group Name': 'Group Name',
+  'Group Description': 'Group Description',
   'Please enter group name': 'Please enter group name',
   'Group Type': 'Group Type',
   'Remarks': 'Remarks',
@@ -227,7 +228,7 @@ export default {
   'File Name': 'File Name',
   'File Format': 'File Format',
   'File Content': 'File Content',
-  'Create': 'Create',
+  'Create': 'Create ',
   'Please enter the resource content': 'Please enter the resource content',
   'File Details': 'File Details',
   'Download Details': 'Download Details',
@@ -314,6 +315,7 @@ export default {
   'Waiting for thread': 'Waiting for thread',
   'Waiting for dependence': 'Waiting for dependence',
   'Start': 'Start',
+  'Manual Start': 'Manual Start',
   'Copy': 'Copy',
   'Copy name': 'Copy name',
   'Delete': 'Delete',
@@ -570,7 +572,28 @@ export default {
   'Branch flow': 'Branch flow',
   'Cannot select the same node for successful branch flow and failed branch flow': 'Cannot select the same node for successful branch flow and failed branch flow',
   'enable parallel': 'enable parallel',
-  'Trigger type': 'Trigger type',
+  'Create Trigger': '新建触发器',
+  'Trigger Type': 'Trigger Type',
   'Time trigger': 'Time trigger',
-  'Event trigger': 'Event trigger'
+  'Event trigger': 'Event trigger',
+  'Trigger group': 'Trigger group',
+  'Trigger GrpMember': 'Trigger Group Member',
+  'Trigger State': 'Trigger State',
+  'Event Trigger Process': 'Process',
+  'Event Trigger Task': 'Task',
+  'Enable Flag': 'Enable Flag',
+  'Enabled': 'Enabled',
+  'Disabled': 'Disabled',
+  'Create Event Trigger Group': 'Create Event Trigger Group'
+  ,'No Event Trigger Group': 'No Event Trigger Group'
+  ,'Please Enter': 'Please Enter '
+  ,'Trigger Time Type': 'Trigger Time Type'
+  ,'Please Select': 'Please Select '
+  ,'Group Members Manage': 'Group Members Manage'
+  ,'Project info of Member': 'Project info of Member'
+  ,'Process info of Member': 'Process info of Member'
+  ,'SubTask info of Member': 'SubTask info of Member'
+  ,'It will be deleted actually after submit': 'It will be deleted actually after submit'
+  ,'#Group': '#Group'
+  ,'It will jump to another page': 'It will jump to another page'
 }

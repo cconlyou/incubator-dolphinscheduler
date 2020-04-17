@@ -21,7 +21,7 @@
     </div>
     <div class="clearfix list">
       <div class="text">
-        {{$t('Trigger type')}}
+        {{$t('Trigger Type')}}
       </div>
       <div class="cont">
         <x-select
@@ -36,13 +36,13 @@
         </x-select>
       </div>
     </div>
+    
     <div v-if="triggerType == 'TIME_TRIGGER'" >
       <div class="clearfix list">
         <x-button type="info"  style="margin-left:20px" shape="circle" :loading="spinnerLoading" @click="preview()">{{$t('Execute time')}}</x-button>
         <div class="text">
           {{$t('Timing')}}
         </div>
-
         <div class="cont">
           <template>
             <x-poptip :ref="'poptip'" placement="bottom-start">
@@ -69,9 +69,52 @@
         </ul>
       </div>
     </div>
-    <div v-if="triggerType == 'EVENT_TRIGGER'" >
+    <!-- <div v-if="triggerType == 'EVENT_TRIGGER'" >
       <div class="clearfix list">
         <div style = "padding-left: 150px; color:orange;">Please config other params in database before supported</div>
+      </div>
+    </div> -->
+    <div v-if="triggerType == 'EVENT_TRIGGER'" class="clearfix list">
+      <x-poptip
+              :ref="'poptip-jump'"
+              placement="bottom-end"
+              width="300px;">
+        <p>{{$t('It will jump to another page')}}</p>
+        <div style="text-align: center; margin: 0;padding-top: 4px;">
+          <x-button type="text" size="xsmall" shape="circle" @click="_closeJump()">{{$t('Cancel')}}</x-button>
+          <x-button type="primary" size="xsmall" shape="circle" @click="_jumpTo(item)">{{$t('Confirm')}}</x-button>
+        </div>
+        <template slot="reference">
+          <x-button type="info" style="margin-left:20px" size="small" >{{$t('Create Event Trigger Group')}}</x-button>
+        </template>
+      </x-poptip>
+      <div class="text">
+        {{$t('Trigger group')}}
+      </div>
+      <div class="cont">
+        <!--
+        <x-select
+                style="width: 360px;"
+                v-model="triggerGroup">
+          <x-option
+                  v-for="item in groupList"
+                  :key="item.value"
+                  :value="item.value"
+                  :label="item.label">
+          </x-option>
+        </x-select>
+        -->
+        <ul v-if="groupList.length">
+          <template v-for="(item,i) in groupList">
+            <div :key='i' style="display: flex;">
+              <li style="width:20px;text-align:center;margin-right:4px;">{{(i + 1)}}</li>
+              <li>{{item.label}}</li>
+            </div>
+          </template>
+        </ul>
+        <ul v-if="!groupList.length" style="height:30px;">
+          <li style="color:#ffc107;margin-left:10px;">{{$t('No Event Trigger Group')}}</li>
+        </ul>
       </div>
     </div>
     <div class="clearfix list">
@@ -206,14 +249,15 @@
         warningGroupId: '',
         spinnerLoading: false,
         scheduleTime: '',
-        crontab: '0 0 * * * ? *',
+        crontab: '0 0 6 * * ? *',  //default trigger at 06:00:00 every day
         cronPopover: false,
         receivers: [],
         receiversCc: [],
         i18n: i18n.globalScope.LOCALE,
         processInstancePriority: 'MEDIUM',
         workerGroupId: -1,
-        previewTimes: []
+        previewTimes: [],
+        groupList: []
       }
     },
     props: {
@@ -237,22 +281,28 @@
           return false
         }
 
-        if (!this.crontab) {
+        if (this.triggerType == 'TIME_TRIGGER' && !this.crontab) {
           this.$message.warning(`${i18n.$t('Please enter crontab')}`)
           return false
         }
+
+        // if (this.triggerType == 'EVENT_TRIGGER' && !this.triggerGroup) {
+        //   this.$message.warning(`${i18n.$t('Please Select')}${i18n.$t('Trigger group')}`)
+        //   return false
+        // }
         return true
       },
       _timing () {
         if (this._verification()) {
           let api = ''
+          let schedule = {
+            startTime: this.scheduleTime[0],
+            endTime: this.scheduleTime[1],
+            crontab: this.crontab
+          }
           let searchParams = {
             triggerType: this.triggerType,
-            schedule: JSON.stringify({
-              startTime: this.scheduleTime[0],
-              endTime: this.scheduleTime[1],
-              crontab: this.crontab
-            }),
+            schedule: JSON.stringify(schedule),
             failureStrategy: this.failureStrategy,
             warningType: this.warningType,
             processInstancePriority: this.processInstancePriority,
@@ -268,9 +318,10 @@
             api = 'dag/updateSchedule'
             searchParams.id = this.item.id
             msg = `${i18n.$t('Edit')}${i18n.$t('success')},${i18n.$t('Please go online')}`
+          // new
           } else {
             api = 'dag/createSchedule'
-            searchParams.processDefinitionId = this.item.id
+            searchParams.processDefinitionId = this.item.processDefinitionId
             msg = `${i18n.$t('Create')}${i18n.$t('success')}`
           }
 
@@ -284,26 +335,26 @@
       },
 
       _preview () {
-              if (this._verification()) {
-                let api = 'dag/previewSchedule'
-                let searchParams = {
-                  schedule: JSON.stringify({
-                    startTime: this.scheduleTime[0],
-                    endTime: this.scheduleTime[1],
-                    crontab: this.crontab
-                  })
-                }
-                let msg = ''
+        if (this._verification()) {
+          let api = 'dag/previewSchedule'
+          let searchParams = {
+            schedule: JSON.stringify({
+              startTime: this.scheduleTime[0],
+              endTime: this.scheduleTime[1],
+              crontab: this.crontab
+            })
+          }
+          let msg = ''
 
-                this.store.dispatch(api, searchParams).then(res => {
-                  if (res.length) {
-                    this.previewTimes = res
-                  } else {
-                    this.$message.warning(`${i18n.$t('There is no data for this period of time')}`)
-                  }
-                })
-              }
-            },
+          this.store.dispatch(api, searchParams).then(res => {
+            if (res.length) {
+              this.previewTimes = res
+            } else {
+              this.$message.warning(`${i18n.$t('There is no data for this period of time')}`)
+            }
+          })
+        }
+      },
 
       _getNotifyGroupList () {
         return new Promise((resolve, reject) => {
@@ -331,15 +382,50 @@
       },
       preview () {
         this._preview()
+      },
+      _jumpTo(item) {
+        this.$emit('close')
+        this.$emit('onJump', item)
+      },
+      _closeJump () {
+        this.$refs['poptip-jump'].doClose()
+      },
+      _getGroupListByProcess (processDefId) {
+        return new Promise((resolve, reject) => {
+            this.store.dispatch('triggers/getTriGroupList',
+                               {processDefId:processDefId}).then(res => {
+              let resultList = _.map(_.cloneDeep(res), v => {
+                return {
+                  value: String(v.groupId),
+                  label: v.groupName,
+                  status: v.enableFlag
+                }
+              })
+              resolve(resultList)
+            })
+          })
       }
     },
     watch: {
+      triggerType(name) {
+        if(name == 'EVENT_TRIGGER'){
+          //init groupList
+          if(this.processDefinitionId) {
+            this._getGroupListByProcess(this.processDefinitionId).then(resultList => {
+                this.groupList = resultList
+            })
+          }
+        }
+      }
     },
     created () {
-      if(this.item.crontab !== null){
-        this.crontab = this.item.crontab
+      if(this.item){
+        this.crontab = this.item.crontab || this.crontab
+        //edit(update) or create
+        this.processDefinitionId = this.item.processDefinitionId || this.item.id
+        this.triggerType = this.item.triggerType || 'TIME_TRIGGER'
       }
-      if(this.type == 'timing') {
+      if(this.triggerType == 'TIME_TRIGGER' && this.type == 'timing') {
         let date = new Date()
         let year = date.getFullYear()
         let month = date.getMonth() + 1
@@ -399,8 +485,9 @@
     margin-top: 0;
     .crontab-box {
       margin: -6px;
-      .v-crontab {
-      }
+      // .v-crontab {
+        
+      // }
     }
     .from-model {
       padding-top: 0;
@@ -426,6 +513,11 @@
       .cont {
         width: 350px;
         float: left;
+        ul {
+            border: 1px solid #DCDEDC;
+            border-radius: 4px;
+            width:360px;
+        }
       }
     }
     .submit {

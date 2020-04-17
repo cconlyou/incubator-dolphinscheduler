@@ -74,9 +74,7 @@ public class TriggerGroup {
     /**
      * enbale flag
      * 0 : on ; 1:off
-     * only for query
      */
-    @TableField(exist = false)
     private int enableFlag = 1;
 
     /**
@@ -85,13 +83,16 @@ public class TriggerGroup {
     private String remark;
 
     /**
+     * update user
+     */
+    private String updateUser;
+
+    /**
      * update time
      * auto generate by database
-     * only for query
      */
-    @TableField(exist = false)
-    private String updateTime;
-    
+    private Date updateTime = new Date();
+
     /**
      * ids separated by Constant.COMMA
      * only for query
@@ -187,11 +188,11 @@ public class TriggerGroup {
       this.enableFlag = enableFlag;
     }
 
-    public String getUpdateTime() {
+    public Date getUpdateTime() {
       return updateTime;
     }
 
-    public void setUpdateTime(String updateTime) {
+    public void setUpdateTime(Date updateTime) {
       this.updateTime = updateTime;
     }
 
@@ -216,6 +217,14 @@ public class TriggerGroup {
 
     public void setRemark(String remark) {
       this.remark = remark;
+    }
+
+    public String getUpdateUser() {
+        return updateUser;
+    }
+
+    public void setUpdateUser(String updateUser) {
+        this.updateUser = updateUser;
     }
 
 }

@@ -562,7 +562,7 @@ CREATE TABLE `t_ds_resources` (
 DROP TABLE IF EXISTS `t_ds_schedules`;
 CREATE TABLE `t_ds_schedules` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'key',
-  `trigger_type` tinyint(4) NOT NULL DEFAULT 11 COMMENT '11:timetrigger;21:eventtrigger-process;22:eventtrigger-task'
+  `trigger_type` tinyint(4) NOT NULL DEFAULT 11 COMMENT '11:timetrigger;21:eventtrigger-process;22:eventtrigger-task',
   `process_definition_id` int(11) NOT NULL COMMENT 'process definition id',
   `start_time` datetime NOT NULL COMMENT 'start time',
   `end_time` datetime NOT NULL COMMENT 'end time',
@@ -749,7 +749,8 @@ CREATE TABLE `td_etl_trigger_group` (
   `enable_flag` int(11) DEFAULT '1',
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_user` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`group_id`)
+  PRIMARY KEY (`group_id`),
+  UNIQUE KEY `group_name_unique` (`group_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
@@ -760,11 +761,12 @@ CREATE TABLE `td_etl_trigger_group_member` (
   `member_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'key',
   `group_id` int(11) NOT NULL,
   `group_name` varchar(100) NOT NULL,
+  `order_in_group` int(11) NOT NULL,
   `project_id` int(11) NOT NULL,
   `project_name` varchar(20) NOT NULL,
   `process_def_id` int(11) NOT NULL,
   `process_def_name` varchar(80) NOT NULL,
-  `task_id` int(11) DEFAULT NULL,
+  `task_id` varchar(20) DEFAULT NULL,
   `task_name` varchar(80) DEFAULT NULL,
   `member_type` int(11) DEFAULT NULL,
   `remark` varchar(100) DEFAULT NULL,
@@ -792,7 +794,7 @@ CREATE TABLE `tr_etl_trigger_event` (
   `project_name` varchar(20) NOT NULL,
   `process_def_id` int(11) NOT NULL,
   `process_def_name` varchar(80) NOT NULL,
-  `task_id` int(11) DEFAULT NULL,
+  `task_id` varchar(20) DEFAULT NULL,
   `task_name` varchar(80) DEFAULT NULL,
   `member_type` int(11) DEFAULT NULL,
   `schedule_time` datetime DEFAULT NULL,
@@ -822,7 +824,7 @@ CREATE TABLE `tl_etl_trigger_event_log` (
   `project_name` varchar(20) NOT NULL,
   `process_def_id` int(11) NOT NULL,
   `process_def_name` varchar(80) NOT NULL,
-  `task_id` int(11) DEFAULT NULL,
+  `task_id` varchar(20) DEFAULT NULL,
   `task_name` varchar(80) DEFAULT NULL,
   `member_type` int(11) DEFAULT NULL,
   `schedule_time` datetime DEFAULT NULL,

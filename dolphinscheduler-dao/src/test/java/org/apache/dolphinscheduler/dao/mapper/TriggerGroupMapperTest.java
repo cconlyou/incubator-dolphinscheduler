@@ -27,6 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class TriggerGroupMapperTest {
@@ -72,6 +75,14 @@ public class TriggerGroupMapperTest {
     @Test
     public void testInsert(){
       triggerGroupMapper.insert(insertOne());
+    }
+
+    @Test
+    public void testQueryListPaging(){
+      Page<TriggerGroup> page = new Page(1, 10);
+      IPage<TriggerGroup> groupIPage = triggerGroupMapper.queryListPaging(
+          page, null, 2, 1, null, false);
+      Assert.assertTrue(groupIPage.getTotal() > 0);
     }
 
 }

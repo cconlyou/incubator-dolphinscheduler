@@ -20,7 +20,9 @@ package org.apache.dolphinscheduler.dao.mapper;
 import org.apache.dolphinscheduler.common.enums.EventTriggerType;
 import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;
 import org.apache.dolphinscheduler.dao.entity.Project;
+import org.apache.dolphinscheduler.dao.entity.TriggerGroup;
 import org.apache.dolphinscheduler.dao.entity.TriggerGroupMember;
+import org.apache.ibatis.annotations.Param;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,11 +30,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class TriggerGroupMemberMapperTest {
 
-    
+
     @Autowired
     TriggerGroupMemberMapper triggerGroupMemberMapper;
 
@@ -55,7 +60,7 @@ public class TriggerGroupMemberMapperTest {
 //      project.setDescription("Junit test");
 //      projectMapper.insert(project);
       Project project = projectMapper.queryByName("PL1");
-      
+
       Assert.assertNotNull(project);
       //insertOne
       TriggerGroupMember groupMemberInst = new TriggerGroupMember();
@@ -67,7 +72,7 @@ public class TriggerGroupMemberMapperTest {
       ProcessDefinition process = processDefMapper.queryByDefineName(project.getId(),"P_CHILD01");
       groupMemberInst.setProcessDefId(process.getId());
       groupMemberInst.setProcessDefName(process.getName());
-      groupMemberInst.setTaskId(1);
+      groupMemberInst.setTaskId("1");
       groupMemberInst.setTaskName("TASK_TST");
       return groupMemberInst;
     }
@@ -75,6 +80,17 @@ public class TriggerGroupMemberMapperTest {
     @Test
     public void testInsert(){
       triggerGroupMemberMapper.insert(insertOne());
+    }
+
+    /**
+     *
+     */
+    @Test
+    public void testQueryListPaging(){
+      Page<TriggerGroupMember> page = new Page(1, 10);
+      IPage<TriggerGroupMember> groupIPage = triggerGroupMemberMapper.queryListPaging(
+          page, null, 2, 1, null, null, false);
+      Assert.assertTrue(groupIPage.getTotal() > 0);
     }
 
 }

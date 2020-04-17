@@ -29,9 +29,9 @@
         and pd.name = #{processDefinitionName}
     </select>
     <select id="queryDefineListPaging" resultType="org.apache.dolphinscheduler.dao.entity.ProcessDefinition">
-        SELECT td.*,sc.schedule_release_state,tu.user_name
+        SELECT td.*,sc.schedule_release_state,sc.trigger_type as schedule_type,tu.user_name
         FROM t_ds_process_definition td
-        left join (select process_definition_id,release_state as schedule_release_state from t_ds_schedules group by process_definition_id,release_state) sc on sc.process_definition_id = td.id
+        left join (select process_definition_id,trigger_type,release_state as schedule_release_state from t_ds_schedules group by process_definition_id,trigger_type,release_state) sc on sc.process_definition_id = td.id
         left join t_ds_user tu on  td.user_id = tu.id
         where td.project_id = #{projectId}
         <if test=" searchVal != null and searchVal != ''">

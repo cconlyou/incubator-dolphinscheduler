@@ -348,8 +348,8 @@ public class ProcessDefinitionController extends BaseController{
             @ApiParam(name = "projectName", value = "PROJECT_NAME",required = true) @PathVariable String projectName,
             @RequestParam("processDefinitionId") Integer processDefinitionId){
         try {
-            logger.info("query task node name list by definitionId, login user:{}, project name:{}, id : {}",
-                    loginUser.getUserName(), projectName, processDefinitionId);
+            logger.info("query task node name list by definitionId, login user:{}, id : {}",
+                    loginUser.getUserName(), processDefinitionId);
             Map<String, Object> result = processDefinitionService.getTaskNodeListByDefinitionId(processDefinitionId);
             return returnDataList(result);
         }catch (Exception e){

@@ -14,26 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Vue from 'vue'
-import Vuex from 'vuex'
-import dag from './dag'
-import projects from './projects'
-import resource from './resource'
-import security from './security'
-import datasource from './datasource'
-import user from './user'
-import monitor from './monitor'
-import triggers from './triggers'
-Vue.use(Vuex)
-export default new Vuex.Store({
-  modules: {
-    dag,
-    projects,
-    resource,
-    security,
-    datasource,
-    user,
-    monitor,
-    triggers
+<template>
+  <div class="line-box">
+    <span class="line"></span>
+    <span class="text"><slot name="name"></slot></span>
+    <span class="line"></span>
+  </div>
+</template>
+<script>
+  export default {
+    name: 'divider'
   }
-})
+</script>
+
+<style lang="scss" rel="stylesheet/scss">
+.line-box{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  //margin: -15px 0px 0px 0px;
+}
+.text{
+  //min-width: 120px;
+  //font-size: 10px;
+  text-align: center;
+}
+.line{
+  width: 40%;
+  height: 1px;
+  background-color: #ccc;
+}
+</style>

@@ -122,8 +122,17 @@ public class SchedulerService extends BaseService {
 
         // check work flow define release state
         ProcessDefinition processDefinition = processService.findProcessDefineById(processDefineId);
-        result = executorService.checkProcessDefinitionValid(processDefinition, processDefineId);
-        if (result.get(Constants.STATUS) != Status.SUCCESS) {
+        //result = executorService.checkProcessDefinitionValid(processDefinition, processDefineId);
+        if (processDefinition == null) {
+            putMsg(result, Status.PROCESS_DEFINE_NOT_EXIST,processDefineId);
+            return result;
+        }
+
+        // keep only one trigger
+        List<Schedule> schedules = scheduleMapper.queryByProcessDefinitionId(processDefineId);
+        if (schedules != null && schedules.size() > 0) {
+            result.put(Constants.STATUS, Status.FAILED);
+            result.put(Constants.MSG, String.format("There has exists one scheduler for process[%s]", processDefineId));
             return result;
         }
 
@@ -142,12 +151,16 @@ public class SchedulerService extends BaseService {
         }
         scheduleObj.setStartTime(scheduleParam.getStartTime());
         scheduleObj.setEndTime(scheduleParam.getEndTime());
-        if (!org.quartz.CronExpression.isValidExpression(scheduleParam.getCrontab())) {
-            logger.error(scheduleParam.getCrontab() + " verify failure");
-
+        if (triggerType == TriggerType.TIME_TRIGGER && !org.quartz.CronExpression.isValidExpression(scheduleParam.getCrontab())) {
+            logger.error("Crontab[{}] for time trigger verify failure",scheduleParam.getCrontab());
             putMsg(result, Status.REQUEST_PARAMS_NOT_VALID_ERROR, scheduleParam.getCrontab());
             return result;
         }
+//        if (triggerType == TriggerType.EVENT_TRIGGER && !scheduleParam.getCrontab().matches("\\d+")) {
+//            logger.error("Crontab[{}] for event trigger verify failure",scheduleParam.getCrontab());
+//            putMsg(result, Status.REQUEST_PARAMS_NOT_VALID_ERROR, scheduleParam.getCrontab());
+//            return result;
+//        }
         scheduleObj.setCrontab(scheduleParam.getCrontab());
         scheduleObj.setTriggerType(triggerType);
         scheduleObj.setWarningType(warningType);
@@ -251,7 +264,7 @@ public class SchedulerService extends BaseService {
             }
             schedule.setStartTime(scheduleParam.getStartTime());
             schedule.setEndTime(scheduleParam.getEndTime());
-            if (!org.quartz.CronExpression.isValidExpression(scheduleParam.getCrontab())) {
+            if (triggerType == TriggerType.TIME_TRIGGER && !org.quartz.CronExpression.isValidExpression(scheduleParam.getCrontab())) {
                 putMsg(result, Status.SCHEDULE_CRON_CHECK_FAILED, scheduleParam.getCrontab());
                 return result;
             }
@@ -330,7 +343,6 @@ public class SchedulerService extends BaseService {
             putMsg(result, Status.SCHEDULE_CRON_REALEASE_NEED_NOT_CHANGE, scheduleStatus);
             return result;
         }
-        // TODO when event trigger : processId is groupId actually 
         ProcessDefinition processDefinition = processService.findProcessDefineById(scheduleObj.getProcessDefinitionId());
         if (processDefinition == null) {
             putMsg(result, Status.PROCESS_DEFINE_NOT_EXIST, scheduleObj.getProcessDefinitionId());

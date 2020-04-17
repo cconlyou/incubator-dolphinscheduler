@@ -179,7 +179,48 @@ const router = new Router({
           meta: {
             title: `${i18n.$t('History task record')}`
           }
-
+        },
+        {
+          path: '/projects/event-trigger/group',
+          name: 'event-trigger-group',
+          component: resolve => require(['../pages/projects/pages/trigroup/index'], resolve),
+          meta: {
+            title: `${i18n.$t('Trigger group')}`
+          },
+          redirect: {
+            name: 'event-trigger-group-list'
+          },
+          children: [
+            {
+              path: '/projects/event-trigger/group/list',
+              name: 'event-trigger-group-list',
+              component: resolve => require(['../pages/projects/pages/trigroup/pages/list/index'], resolve),
+              meta: {
+                title: `${i18n.$t('Trigger group')}`
+              }
+            }
+          ]
+        },
+        {
+          path: '/projects/event-trigger/group-member',
+          name: 'event-trigger-group-member',
+          component: resolve => require(['../pages/projects/pages/trimember/index'], resolve),
+          meta: {
+            title: `${i18n.$t('Trigger GrpMember')}`
+          },
+          redirect: {
+            name: 'event-trigger-group-member-list'
+          },
+          children: [
+            {
+              path: '/projects/event-trigger/group-member/list',
+              name: 'event-trigger-group-member-list',
+              component: resolve => require(['../pages/projects/pages/trimember/pages/list/index'], resolve),
+              meta: {
+                title: `${i18n.$t('Trigger GrpMember')}`
+              }
+            }
+          ]
         }
       ]
     },

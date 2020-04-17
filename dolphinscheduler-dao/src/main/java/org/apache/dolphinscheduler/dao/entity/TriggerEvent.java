@@ -102,12 +102,12 @@ public class TriggerEvent {
     /**
      * task id
      */
-    private int taskId;
+    private String taskId;
     /**
      * task name
      */
     private String taskName;
-    
+
     /**
      * trigger event type / member type
      */
@@ -267,11 +267,11 @@ public class TriggerEvent {
       this.processDefName = processDefName;
     }
 
-    public int getTaskId() {
+    public String getTaskId() {
       return taskId;
     }
 
-    public void setTaskId(int taskId) {
+    public void setTaskId(String taskId) {
       this.taskId = taskId;
     }
 

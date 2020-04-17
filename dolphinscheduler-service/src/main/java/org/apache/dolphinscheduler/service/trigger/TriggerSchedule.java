@@ -61,6 +61,7 @@ public class TriggerSchedule extends Thread{
         while(true){
           try {
             logger.info("EventTrigger start scan ...");
+            scanTriggeredGroups();
             Thread.sleep(Constants.EVENT_TRIGGER_SLEEP_SECONDS * 1000);
           } catch (InterruptedException e) {
             logger.error("EventTrigger stop :{}",e.getMessage(),e);
@@ -96,13 +97,12 @@ public class TriggerSchedule extends Thread{
       String processDefName = triggeredGroup.getTriProcessDefName();
       String[] eventIdsStrArr = triggeredGroup.getEventIds().split(Constants.COMMA,-1);
       int[] eventIds = StringUtils.strArr2intArr(eventIdsStrArr);
-      eventIds = new int[eventIdsStrArr.length];
       logger.info("scheduled fire time :{}, fire time :{}, project name :{}, process name :{}"
-                 , scheduledFireTime, fireTime, projectName, processDefName); 
+                 , scheduledFireTime, fireTime, projectName, processDefName);
       // query schedule
-      Schedule schedule = processService.findSchedule(triggeredGroup.getGroupId());
+      Schedule schedule = processService.findSchedule(triggeredGroup.getTriProcessDefId());
       if (schedule == null) {
-          logger.warn("Group[{}]'s schedule does not exist in schedule config, disable these events[{}]"
+          logger.warn("Group[{}]'s schedule does not exist or disabled in schedule config, disable these events[{}]"
               , triggeredGroup.getGroupName()
               , triggeredGroup.getEventIds()
               );

@@ -34,13 +34,13 @@
           <th scope="col" width="70">
             <span>{{$t('Run Type')}}</span>
           </th>
-          <th scope="col" width="130">
+          <th scope="col" width="70">
             <span>{{$t('Scheduling Time')}}</span>
           </th>
-          <th scope="col" width="130">
+          <th scope="col" width="70">
             <span>{{$t('Start Time')}}</span>
           </th>
-          <th scope="col" width="130">
+          <th scope="col" width="70">
             <span>{{$t('End Time')}}</span>
           </th>
           <th scope="col" width="60">
